@@ -363,7 +363,7 @@ vyšší číslo, tím těsněji se daný operátor váže. Příklad:
     a + (b * c)
 
 
-    infixl 5 #
+    infixl 5 # -- levá asociativita
 
     a # b # c
 
@@ -373,7 +373,7 @@ vyšší číslo, tím těsněji se daný operátor váže. Příklad:
 
     Ale naproti tomu:
 
-    infixr 5 #
+    infixr 5 # -- pravá asociativita
 
     a # b # c
 

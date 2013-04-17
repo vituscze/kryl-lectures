@@ -79,7 +79,7 @@ neskončili u metody pokus/omyl a také abyste psali pěkný kód) je syntaxe
 pro aplikaci funkcí.
 
   V Haskellu totiž žádná syntaxe pro aplikaci funkcí není, aplikace je
-jednoduchá juxtapozice termů (tj. dáte dvě věci za sebe), závorky slouží
+jednoduchá juxtapozice výrazů (tj. dáte dvě věci za sebe), závorky slouží
 pouze ke seskupování výrazů. Několik příkladů:
 
   add :: Int -> Int -> Int
@@ -123,7 +123,7 @@ pouze ke seskupování výrazů. Několik příkladů:
   bez ohledu na prioritu operátoru +
 
 
-  Dále kryl zmínil převádění prefixních funkcí na funkce infixní, k čemuž bych
+  Dále Kryl zmínil převádění prefixních funkcí na funkce infixní, k čemuž bych
 jen dodal pár příkladů, kdy se tohle může hodit:
 
   sum :: [Int] -> Int
@@ -298,7 +298,7 @@ příkladů vám nebude fungovat právě kvůli špatnému závorkování.
     root :: Tree a -> a
     root Node l x r = x
 
-  Pokus napíšete toto, snažíte se definovat funcki 4 proměnných. Kromě toho,
+  Pokud napíšete toto, snažíte se definovat funcki 4 proměnných. Kromě toho,
 že 'Node' samotný není pattern, tak dostanete typovou chybu, protože typová
 signatura funkce 'root' specifikuje pouze 1 argument. Správně je:
 
@@ -435,6 +435,6 @@ věcí než čísla. Zeptejme se, co umí typová třída Enum.
   ------------
 
   Celý tento dokument je sepsán velmi narychlo, pokud najdete chybu nebo si dáte
-práci s pěknějším formátováním, můžete mě kontaktovat:
+práci s pěknějším formátováním, můžete mě kontaktovat na adrese:
 
   vituscze@gmail.com

@@ -14,9 +14,9 @@ uvádím odkaz na
   http://research.microsoft.com/en-us/um/people/simonpj/papers/history-of-haskell/history.pdf
 
 
-  Je pravda, že v Haskellu berou všechny funkce pouze jeden argument, ale tohle
-je v rozporu s pozdějším Krylovo tvrzením, že konstanty jsou vlastně nulární
-funkce. Haskell na úrovni typů velice ostře rozlišuje funkce od konstant.
+  Funkce v Haskellu skutečně berou pouze jeden argument, ale tohle je v rozporu
+s pozdějším Krylovo tvrzením, že konstanty jsou vlastně nulární funkce. Haskell
+na úrovni typů velice ostře rozlišuje funkce od konstant.
 
   Tedy například:
 
@@ -291,10 +291,9 @@ taky nepodporuje unifikaci v Prologovském smyslu. NEMŮŽETE tedy napsat toto:
 předáme dvojici FUNKCÍ. Unifikace funkcí, speciálně tedy test na rovnost, je
 algoritmicky nerozhodnutelný problém (viz Halting Problem).
 
-  A poslední detail: než se do Haskellu ponoříte trochu více, tak zatím můžete
-používat jednoduché pravidlo k závorkování: závorkujte každý netriviální
-pattern. Polovina Krylových příkladů vám nebude fungovat právě kvůli špatnému
-závorkování.
+  Než se do Haskellu ponoříte trochu více, tak zatím můžete používat jednoduché
+pravidlo k závorkování: závorkujte každý netriviální pattern. Polovina Krylových
+příkladů vám nebude fungovat právě kvůli špatnému závorkování.
 
     root :: Tree a -> a
     root Node l x r = x
@@ -337,8 +336,7 @@ nabývat (pak ošetříte pouze jeden případ a funkce "spadne" pro některé v
   II.V. Operátory
   ---------------
 
-  Poslední užitečná poznámka: prioritu operátorů si můžete sami zjisit pomocí
-GHCi takto:
+  Prioritu operátorů si můžete sami zjisit pomocí GHCi takto:
 
     ghci> :i :
     data [] a = ... | a : [a]       -- Defined in `GHC.Types'

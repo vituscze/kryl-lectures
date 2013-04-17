@@ -112,7 +112,7 @@ pouze ke seskupování výrazů. Několik příkladů:
 
   se pokouší volat funkci 'f' s 3 argumenty, g, x a y.
 
-  Aplikace funkcí má nejvyšší prioritu, tj.
+  Prefixní aplikace funkcí má nejvyšší prioritu, tj.
 
   f x + g y
 

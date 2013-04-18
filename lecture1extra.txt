@@ -140,7 +140,7 @@ extensionů Rank2Types, RankNTypes, GADTs a možná ještě více.
 
   případně
 
-    ghc -O source
+    ghc -O source.hs
 
   pro optimalizace.
 

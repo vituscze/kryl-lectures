@@ -346,7 +346,7 @@ počítá jako pokračování předchozí, řádka s odsazením stejným se poč
 
     g z = z                -- indentace menší, konec layoutu
 
-  Indentačí úroveň celého modulu je 0. Tj. v tomto kódu
+  Indentační úroveň celého modulu je 0. Tj. v tomto kódu
 
     f x = let a = 5
               b = 6

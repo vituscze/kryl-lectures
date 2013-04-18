@@ -334,10 +334,10 @@ Narozdíl od jiných jazyků s podobnou "vadou" je layout v Haskellu celkem
 rozumný.
 
   Část klíčových slov v Haskellu uvozuje layout, konkrétně se jedná o 'let',
-'where', 'of' a 'do' (bude později). První non-whitespace znak pak určuje
-odsazení bloku. Řádka s odsazením vyšším se počítá jako pokračování předchozí,
-řádka s odsazením stejným se počítá jako nová řádka a konečně řádka s nižším
-odsazením ukončuje layout. Například:
+'where', 'of' a 'do' (bude později). První non-whitespace znak, který není
+součástí komentáře, pak určuje odsazení bloku. Řádka s odsazením vyšším se
+počítá jako pokračování předchozí, řádka s odsazením stejným se počítá jako nová
+řádka a konečně řádka s nižším odsazením ukončuje layout. Například:
 
     f x = case x of        -- of je layout keyword
         [] -> 1 + product  -- [ určuje identaci +4 vůči 'f'

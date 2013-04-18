@@ -151,9 +151,9 @@ extensionů Rank2Types, RankNTypes, GADTs a možná ještě více.
   v modulu Main. K tomu se dostaneme na pozdějších přednáškách.
 
 
-  Dále je tu GHCi, kde strávíte převážnou většinu času. Pro pohodlnou práci
-se obvykle doporučuje vytvořit si nějaký soubor, dále jako source.hs a pomocí
-GHCi si ho načíst. To se dá provést několika způsoby:
+  Dále je tu GHCi, kde strávíte většinu času. Pro pohodlnou práci se obvykle
+doporučuje vytvořit si nějaký soubor, dále jako source.hs a pomocí GHCi si ho
+načíst. To se dá provést několika způsoby:
 
     ghci source.hs (rovnou načte soubor)
     ghci           (pustí pouze GHCi)
@@ -167,7 +167,7 @@ pár dalších příkazů, které se vám mohou hodit:
     :cd dir             -- změní working directory
     :l source.hs        -- načte soubor
     :r                  -- reload souboru
-    :t hodnota          -- určí typ hodnoty
+    :t expr             -- určí typ výrazu
     :i jméno            -- zobrazuje informace o daném jméně, dá se použít na
                         -- typové třídy, operátory, funkce atp.
     :k typecon          -- oznámí kind typového konstruktoru, více (snad)

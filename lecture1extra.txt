@@ -341,10 +341,10 @@ odsazením ukončuje layout. Například:
 
     f x = case x of        -- of je layout keyword
         [] -> 1 + product  -- [ určuje identaci +4 vůči 'f'
-            [1..7]         -- identace větší než +4, je to část předchozí řádky
-        (x:_) -> x * x     -- identace stejná, nová alternativa case
+            [1..7]         -- indentace větší než +4, je to část předchozí řádky
+        (x:_) -> x * x     -- indentace stejná, nová alternativa case
 
-    g y = y                -- identace menší, konec layoutu
+    g y = y                -- indentace menší, konec layoutu
 
   Indentačí úroveň celého modulu je 0. Tj. v tomto kódu
 

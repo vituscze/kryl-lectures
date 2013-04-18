@@ -278,7 +278,7 @@ ekvivalentní:
   Plní tedy podobný účel jako let, ale vypadá o něco lépe.
 
     lenght :: [a] -> Int
-    length l = go 0 l
+    length l = go 0 l -- 'go' je časté jméno pro rekurzivní helper funkci
       where
         go acc []     = acc
         go acc (_:xs) = go (acc + 1) xs

@@ -339,12 +339,12 @@ součástí komentáře, pak určuje odsazení bloku. Řádka s odsazením vyš�
 počítá jako pokračování předchozí, řádka s odsazením stejným se počítá jako nová
 řádka a konečně řádka s nižším odsazením ukončuje layout. Například:
 
-    f x = case x of        -- of je layout keyword
+    f y = case y of        -- of je layout keyword
         [] -> 1 + product  -- [ určuje identaci +4 vůči 'f'
             [1..7]         -- indentace větší než +4, je to část předchozí řádky
         (x:_) -> x * x     -- indentace stejná, nová alternativa case
 
-    g y = y                -- indentace menší, konec layoutu
+    g z = z                -- indentace menší, konec layoutu
 
   Indentačí úroveň celého modulu je 0. Tj. v tomto kódu
 
@@ -363,7 +363,7 @@ společného, tak Haskell nabízí explicitní layout pomocí složených závor
 závorka, tak se layout pro tuto část vypíná a řádky se explicitně označují
 středníkem. Tj.
 
-    f x = case x of { [] -> 1 + product
+    f y = case y of { [] -> 1 + product
              [1..7]; (x:_)
     -> x * x}
 

@@ -22,7 +22,8 @@ asociativitu. Co to znamená?
 
   Tohle je přesně v souladu s tím, že funkce v Haskellu berou pouze jeden
 argument. Nejprve aplikujeme foldr na funkci f, čímž dostaneme funkci, kterou
-pak zavoláme na z, atp. V C-čkové syntaxi by takovéto volání poněkud podivně.
+pak zavoláme na z, atp. V C-čkové syntaxi by takovéto volání vypadalo poněkud
+podivně.
 
     foldr(f)(z)(list)
 
@@ -40,6 +41,7 @@ pak zavoláme na z, atp. V C-čkové syntaxi by takovéto volání poněkud podi
                             /  \                         /  \
                            /    \                       /    \
                          [a]     b                    [a]     b
+
   A tohle funguje právě díky tomu, že prefixní aplikace se asociuje vlevo a má
 vysokou prioritu, zatímco funkčí šipka má pravou asociativitu a nízkou prioritu.
 
@@ -83,12 +85,12 @@ další funkce, kterou poté aplikujeme na [1..5].
   Haskell je schopný odvodit nejobecnější typ k jakékoliv funkci, tj. pokud
 např. napíšete:
 
-  f = map (*2)
+  f x = map (*2) x
 
   a poté se zeptáte na typ funkce f (což se dělá pomocí příkazu :t funkce
 uvnitř GHCi, viz další kapitola), dostanete odpověď:
 
-    ghci> let f = map (*2)
+    ghci> let f x = map (*2) x
     ghci> :t f
     f :: Num b => [b] -> [b]
 

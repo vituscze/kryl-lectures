@@ -317,7 +317,7 @@ hodnota case výrazu je 1 * 2, tedy 2.
 
   V Haskellu je také obyčejné if-then-else s jednoduchou syntaxí:
 
-    if condthen expr1 else expr2
+    if cond then expr1 else expr2
 
   cond je libovolný výraz typu Bool, expr1 a expr2 libovolné výrazy stejného
 typu. Pozor, že else větev je povinná (v tomto smyslu se dá na if-then-else
@@ -402,6 +402,11 @@ začínají malým písmenem. Naopak konstruktory začínají písmenem velkým,
     printError :: Either String Int -> String
     printError (Left error) = error
     printError (Right value) = show value
+
+  Either je následující datový typ:
+
+    ghci> :i Either
+    data Either a b = Left a | Right b      -- Defined in `Data.Either'
 
   Zase je na první pohled vidět, co je konstruktor a co je proměnná. To je také
 důvod, proč nelze zkompilovat např.:

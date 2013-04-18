@@ -85,7 +85,7 @@ další funkce, kterou poté aplikujeme na [1..5].
   Haskell je schopný odvodit nejobecnější typ k jakékoliv funkci, tj. pokud
 např. napíšete:
 
-  f x = map (*2) x
+    f x = map (*2) x
 
   a poté se zeptáte na typ funkce f (což se dělá pomocí příkazu :t funkce
 uvnitř GHCi, viz další kapitola), dostanete odpověď:
@@ -186,9 +186,9 @@ v pořádku, GHCi odpoví něco ve smyslu:
 automaticky reloadne daný soubor. :r je vůbec příkaz, který se používá často.
 
   Kromě toho, že v GHCi můžete vyhodnocovat různé výrazy, můžete také definovat
-vlastní funkce a hodnoty. Pozor, že z historických důvodů se definice uvnitř
-GHCi píší poněkud zvláštním způsobem (proto doporučení psát si věci do souboru
-a pak ho načíst do GHCi). Např.
+vlastní funkce a hodnoty. Pozor, z historických důvodů se definice uvnitř GHCi
+píší poněkud zvláštním způsobem (proto doporučení psát si věci do souboru a pak
+ho načíst do GHCi). Např.:
 
     source.hs:
 
@@ -279,7 +279,7 @@ ekvivalentní:
 
   Plní tedy podobný účel jako let, ale vypadá o něco lépe.
 
-    lenght :: [a] -> Int
+    length :: [a] -> Int
     length l = go 0 l -- 'go' je časté jméno pro rekurzivní helper funkci
       where
         go acc []     = acc

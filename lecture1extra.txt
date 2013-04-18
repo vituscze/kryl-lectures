@@ -27,7 +27,7 @@ pak zavoláme na z, atp. V C-čkové syntaxi by takovéto volání poněkud podi
     foldr(f)(z)(list)
 
   Aplikace funkcí na nějaký argument tedy z typové signatury odřízne vrchol
-(funkčí šipku) a jeho pravý podstrom (první argument).
+(funkčí šipku) a jeho levý podstrom (první argument).
 
 
          foldr :: (->)

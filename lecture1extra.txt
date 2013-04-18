@@ -380,7 +380,104 @@ chyb.
   Odsazování řeště pouze pomocí mezer.
 
 
-  V. Závěrem
+  V. Case sensitivity
+  -------------------
+
+  Kromě toho, že jsou jména case sensitive, využívá Haskell rozlišení podle
+velikosti písmen pro několik důležitých věcí:
+
+  V typové signatuře označují jména začínající velkým písmenem konkrétní typy,
+tedy např. Int, Integer, Char, String atp. Jména začínající malým písmenem jsou
+pak typové proměnné. Tohle má příjemný důsledek, že kdykoliv se podíváte na
+signaturu, velice jednoduše určíte, co je "generické" a co je konkrétní:
+
+    insert :: key -> value -> Map key value -> Map key value
+
+  Tj. insert funguje pro libovolné typy key a value a vkládá tyto dvě hodnoty
+do mapy, což je konkrétní typ označený jako Map.
+
+  Na úrovni výrazu je rozlišení podobné. Funkce, konstanty, argumenty, všechny
+začínají malým písmenem. Naopak konstruktory začínají písmenem velkým, tj.
+
+    printError :: Either String Int -> String
+    printError (Left error) = error
+    printError (Right value) = show value
+
+  Zase je na první pohled vidět, co je konstruktor a co je proměnná. To je také
+důvod, proč nelze zkompilovat např.:
+
+    Find :: Ord a => a -> Set a -> Bool
+
+  Správně je pouze 'find'.
+
+  ===========
+  Pro zájemce
+  ===========
+
+  Haskell rozlišuje dva základní jmenné prostory: pro typy a pro hodnoty. Když
+deklarujete tento typ:
+
+    data Pair a b = Pair a b
+
+  tak se nejedná o rekurzivní definici. data Pair definuje Pair v jmenném
+prostoru typů, zatímco = Pair definuje konstruktor, tedy jméno v jmenném
+prostoru hodnot. Bývá zvykem dávát typům, které mají pouze jeden konstruktor
+stejné jméno jak pro konstruktor tak pro typ (či typový konstruktor).
+
+  Typy a hodnoty jsou velice dobře odděleny, takže toto nevede k
+nejednoznačnosti.
+
+  Obyčejně se moduly importují do globálního jmenného prostoru, ale spousta
+modulů definuje funkce, jejichž jména kolidují s jmény v Prelude, např. Data.Map
+definuje funkci:
+
+    map :: (a -> b) -> Map key a -> Map key b
+
+  Tyto moduly byly navrženy tak, abyste je importovaly pod jejich plným jménem,
+tedy:
+
+    import Data.Map
+
+    f = map
+
+    <interactive>:9:9:
+    Ambiguous occurrence `map'
+    It could refer to either `Data.Map.map', imported from `Data.Map'
+                          or `Prelude.map',
+                             imported from `Prelude' (and originally defined in
+    `GHC.Base')
+
+  versus:
+
+    import qualified Data.Map
+
+    f :: (a -> b) -> Data.Map.Map key a -> Data.Map.Map key b
+    f = Data.Map.map
+
+  nebo:
+
+    import qualified Data.Map as Map
+
+    f :: (a -> b) -> Map.Map key a -> Map.Map key a
+    f = Map.map
+
+
+  Tyto importy se dají různě kombinovat, např. jméno typu Map se v Prelude
+nevyskytuje, bylo by tedy otravné pořád vypisovat Map.Map:
+
+    import qualified Data.Map as Map -- import všeho pod jménem Map
+    import Data.Map (Map)            -- import nekvalifikovaného jména Map
+
+    f :: (a -> b) -> Map key a -> Map key b -- ideální
+    f = Map.map
+
+  Několik příkladů je opět k vidění v repozitáři logic.
+
+  =======================
+  Konec části pro zájemce
+  =======================
+
+  VI. Závěrem
   ----------
 
   Pokud by byly nějaké dotazy, připomínky či korekce, tak mi můžete napsat na:

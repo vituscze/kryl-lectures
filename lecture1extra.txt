@@ -367,6 +367,18 @@ středníkem. Tj.
              [1..7]; (x:_)
     -> x * x}
 
+  =================
+  Důležitá poznámka
+  =================
+
+  Pokud budete používat layout (což doporučuji), tak ve vašem oblíbeném editoru
+vypněte skutečné tabulátory. Standard totiž vyžaduje interpretovat TAB jako
+zarovnání na nejbližších dalších 8 sloupců. Jelikož tabulátory jsou obyčejně
+nastavované na 2 nebo 4 sloupce, můžete se dopustit spousty "neviditelných"
+chyb.
+
+  Odsazování řeště pouze pomocí mezer.
+
 
   V. Závěrem
   ----------

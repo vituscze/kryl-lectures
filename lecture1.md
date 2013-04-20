@@ -52,8 +52,7 @@ Na toto téma mohu doporučit (relativně krátký) [blog post Conala Elliota](h
 II. Syntaxe
 -----------
 
-II.I. Funkce
-------------
+### II.I. Funkce
 
 Co Kryl na přednášce nezmínil a přitom je to velice podstatné (hlavně abyste neskončili u metody pokus/omyl a také abyste psali pěkný kód) je syntaxe pro aplikaci funkcí.
 
@@ -116,8 +115,7 @@ Dále Kryl zmínil převádění prefixních funkcí na funkce infixní, k čemu
     if 1 `memberOf` someList then ... else ...
 
 
-II.II. Typové třídy
--------------------
+### II.II. Typové třídy
 
 Další poznámka se týká kontextů. Kryl ukazoval příklad:
 
@@ -157,8 +155,7 @@ Pokud chcete vědět, co jednotlivé typové třídy obsahují za funkce, může
       ...
 
 
-II.III. Datové typy
--------------------
+### II.III. Datové typy
 
 Dále tu máme definice nových typů a keyword `data`. Uvažme opět binární stromy:
 
@@ -229,8 +226,7 @@ Můžeme tedy provést například toto:
     f number list = map (Cons number) list
 
 
-II.IV. Pattern matching
------------------------
+### II.IV. Pattern matching
 
 Nyní se dostáváme k nejdůležitější části a to je pattern matching. Pár poznámek k vyhodnocování a odpověď na nezodpovězenou otázku z přednášky.
 
@@ -287,8 +283,7 @@ V některých případech lze pattern napsat přímo do seznamu argumentů, ale 
 předchozí anonymní funkce má typ `Num a => (a, a) -> a`.
 
 
-II.V. Operátory
----------------
+### II.V. Operátory
 
 Prioritu operátorů si můžete sami zjisit pomocí GHCi takto:
 

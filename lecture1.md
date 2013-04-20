@@ -324,8 +324,7 @@ Ale naproti tomu:
     a # (b # c)
 
 
-II.VI. Intervaly
-----------------
+### II.VI. Intervaly
 
 Správná syntaxe pro intervaly je:
 

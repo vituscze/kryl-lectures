@@ -1,10 +1,10 @@
-Korekce 2. pøednášky
+Korekce 2. pÅ™ednÃ¡Å¡ky
 ====================
 
 I. Definice
 -----------
 
-Infixní operátory se dají definovat všemonımi zpùsoby, Kryl ukazoval na pøednášce pouze jeden. Jako pøíklad si vezmeme opìt operátor `(.)` (kompozice funkcí):
+InfixnÃ­ operÃ¡tory se dajÃ­ definovat vÅ¡emoÅ¾nÃ½mi zpÅ¯soby, Kryl ukazoval na pÅ™ednÃ¡Å¡ce pouze jeden. Jako pÅ™Ã­klad si vezmeme opÄ›t operÃ¡tor `(.)` (kompozice funkcÃ­):
 
     (.) :: (b -> c) -> (a -> b) -> a -> c
 
@@ -14,32 +14,32 @@ Infixní operátory se dají definovat všemonımi zpùsoby, Kryl ukazoval na pøednáš
 
     f . g = \x -> f (g x)
 
-    -- matematickı zápis
+    -- matematickÃ½ zÃ¡pis
     (f . g) x = f (g x)
 
-Opìt se na pøednášce vyskytl problém s kontexty, které nepatøí pøed typovou signaturu, ale za `::`:
+OpÄ›t se na pÅ™ednÃ¡Å¡ce vyskytl problÃ©m s kontexty, kterÃ© nepatÅ™Ã­ pÅ™ed typovou signaturu, ale za `::`:
 
     Ord(a) => qs :: [a] -> [a]
 
-    -- správnì je
+    -- sprÃ¡vnÄ› je
     qs :: ord a => [a] -> [a]
 
-Viz korekce první pøednášky.
+Viz korekce prvnÃ­ pÅ™ednÃ¡Å¡ky.
 
 II. Quicksort
 -------------
 
-Další populární chybou je oznaèovat definici:
+DalÅ¡Ã­ populÃ¡rnÃ­ chybou je oznaÄovat definici:
 
     sort []     = []
     sort (x:xs) = [y | y <- xs, y <= x] ++ [x] ++ [y | y <- xs, y > x]
 
-za quicksort. Jistì, jednou ze základních idejí quicksortu je metoda rozdìl a panuj, nicménì druhou dùleitou ideou je in-place pøerozdìlení pole. Tato definice bıvá oznaèována jako tree sort.
+za quicksort. JistÄ›, jednou ze zÃ¡kladnÃ­ch idejÃ­ quicksortu je metoda rozdÄ›l a panuj, nicmÃ©nÄ› druhou dÅ¯leÅ¾itou ideou je in-place pÅ™erozdÄ›lenÃ­ pole. Tato definice bÃ½vÃ¡ oznaÄovÃ¡na jako tree sort.
 
-III. Operátory
+III. OperÃ¡tory
 --------------
 
-Drobná poznámka k sekcím operátorù (operator section):
+DrobnÃ¡ poznÃ¡mka k sekcÃ­m operÃ¡torÅ¯ (operator section):
 
     (1+) :: Int -> Int
     (+1) :: Int -> Int
@@ -47,15 +47,15 @@ Drobná poznámka k sekcím operátorù (operator section):
     (1-) :: Int -> Int
     (-1) :: Int
 
-`(-1)` není sekce operátoru, ale konstanta. Narozdíl od jazyka `ML` nás Haskell nenutí pouívat `~1` pro záporná èísla. Na druhou stranu si ale programátor musí dávat pozor na podobné vırazy:
+`(-1)` nenÃ­ sekce operÃ¡toru, ale konstanta. NarozdÃ­l od jazyka `ML` nÃ¡s Haskell nenutÃ­ pouÅ¾Ã­vat `~1` pro zÃ¡pornÃ¡ ÄÃ­sla. Na druhou stranu si ale programÃ¡tor musÃ­ dÃ¡vat pozor na podobnÃ© vÃ½razy:
 
     succ -1
     -- parsuje se jako (succ) - (1)
 
     succ (-1)
-    -- v poøádku
+    -- v poÅ™Ã¡dku
 
-A samozøejmì problém se sekcí operátoru `(-)`. Pro "sekci" typu `(-n)` nabízí Haskell funkci:
+A samozÅ™ejmÄ› problÃ©m se sekcÃ­ operÃ¡toru `(-)`. Pro "sekci" typu `(-n)` nabÃ­zÃ­ Haskell funkci:
 
     subtract n
     -- subtract n m = m - n
@@ -63,7 +63,7 @@ A samozøejmì problém se sekcí operátoru `(-)`. Pro "sekci" typu `(-n)` nabízí Ha
 IV. Bottom
 ----------
 
-Haskell pro bottom nepouívá hodnotu `bot`, ale `undefined`, pøípadnì ještì `error`.
+Haskell pro bottom nepouÅ¾Ã­vÃ¡ hodnotu `bot`, ale `undefined`, pÅ™Ã­padnÄ› jeÅ¡tÄ› `error`.
 
     undefined :: a
     undefined = ... -- implementation defined
@@ -71,7 +71,7 @@ Haskell pro bottom nepouívá hodnotu `bot`, ale `undefined`, pøípadnì ještì `err
     error :: String -> a
     error errormsg = ... -- implementation defined
 
-Co je také odpovìï na otázku z pøednášky: `undefined` má univerzálnì polymorfní typ. To dává smysl, pokud uváíme, e jsme schopni napsat nekoneènou rekurzi pro jakıkoliv typ a divergence je sémanticky bottom.
+CoÅ¾ je takÃ© odpovÄ›Ä na otÃ¡zku z pÅ™ednÃ¡Å¡ky: `undefined` mÃ¡ univerzÃ¡lnÄ› polymorfnÃ­ typ. To dÃ¡vÃ¡ smysl, pokud uvÃ¡Å¾Ã­me, Å¾e jsme schopni napsat nekoneÄnou rekurzi pro jakÃ½koliv typ a divergence je sÃ©manticky bottom.
 
     x :: [Int]
     x = undefined
@@ -79,20 +79,20 @@ Co je také odpovìï na otázku z pøednášky: `undefined` má univerzálnì polymorfní
 V. Lazy patterns
 ----------------
 
-Lazy patterny jsou sémanticky ekvivalentí lokální definici:
+Lazy patterny jsou sÃ©manticky ekvivalentÃ­ lokÃ¡lnÃ­ definici:
 
     f ~(a, b) = 0
 
     f p = 0
       where (a, b) = p 
 
-Pozor, pokud je pattern, ke kterému pøipíšeme `~` triviální (promìnná nebo podtrítko), tak `~` nemá ádnı efekt.
+Pozor, pokud je pattern, ke kterÃ©mu pÅ™ipÃ­Å¡eme `~` triviÃ¡lnÃ­ (promÄ›nnÃ¡ nebo podtrÅ¾Ã­tko), tak `~` nemÃ¡ Å¾Ã¡dnÃ½ efekt.
 
     f x y = ...
-    -- je ekvivalentní s
+    -- je ekvivalentnÃ­ s
     f ~x ~y = ...
 
-VI. Závìrem
+VI. ZÃ¡vÄ›rem
 -----------
 
-Jako obvykle jsem k zastiení na adrese vituscze@gmail.com
+Jako obvykle jsem k zastiÅ¾enÃ­ na adrese vituscze@gmail.com

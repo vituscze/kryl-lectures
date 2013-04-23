@@ -34,7 +34,7 @@ Další populární chybou je označovat definici:
     sort []     = []
     sort (x:xs) = [y | y <- xs, y <= x] ++ [x] ++ [y | y <- xs, y > x]
 
-za quicksort. Jistě, jednou ze základních idejí quicksortu je metoda rozděl a panuj, nicméně druhou důležitou ideou je in-place přerozdělení pole. Tato definice bývá označována jako tree sort. Viz [Stack Overflow](http://stackoverflow.com/questions/7717691).
+za quicksort. Jistě, jednou ze základních idejí quicksortu je metoda rozděl a panuj, nicméně druhou důležitou ideou je in-place přerozdělení pole. Tato definice bývá označována jako varianta tree sortu, který nepoužívá pomocný strom (deforested tree sort). Viz [Stack Overflow](http://stackoverflow.com/questions/7717691).
 
 III. Operátory
 --------------

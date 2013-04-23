@@ -76,15 +76,15 @@ Což je také odpověď na otázku z přednášky: `undefined` má univerzálně
     x :: [Int]
     x = undefined
 
-V. Lazy patterns
-----------------
+V. Patterny
+-----------
 
 Lazy patterny jsou sémanticky ekvivalentí lokální definici:
 
     f ~(a, b) = 0
 
     f p = 0
-      where (a, b) = p 
+      where (a, b) = p
 
 Pozor, pokud je pattern, ke kterému připíšeme `~` triviální (proměnná nebo podtržítko), tak `~` nemá žádný efekt.
 
@@ -92,7 +92,25 @@ Pozor, pokud je pattern, ke kterému připíšeme `~` triviální (proměnná ne
     -- je ekvivalentní s
     f ~x ~y = ...
 
+As patterny se používají v situacích, kdy se často odkazujete na celý pattern, např.:
+
+    merge :: Ord a => [a] -> [a] -> [a]
+    merge [] ys = ys
+    merge xs [] = xs
+    merge xs@(x:xs') ys@(y:ys')
+      | x <= y    = x:merge xs' ys
+      | otherwise = y:merge xs  ys'
+
+Opět, as pattern je sémanticky ekvivalentní lokální definici:
+
+    case expr of as@pat -> -- ...
+
+    let as = expr
+    in case expr of pat -> -- ...
+
 VI. Závěrem
 -----------
+
+Všiml jsem si, že spousta příkladů z přednášky je převzata z [language reportu](http://www.haskell.org/onlinereport/haskell2010/).
 
 Jako obvykle jsem k zastižení na adrese vituscze@gmail.com

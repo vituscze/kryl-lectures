@@ -136,7 +136,7 @@ První řádek definice `mapEither` vypadá jako vhodný kandidát na as-pattern
     In the expression: e
     In an equation for `mapEither': mapEither f e@(Left _) = e
 
-Problém je ten, že `Left e` na levé straně rovnítka má typ `Either e a` zatímco na pravé straně potřebujeme `Either e b`. Pokud si dáme tu práci a na pravé straně přepíšeme znovu konstruktor `Left`, tak je vše v pořádku. Proč? `Left` sám o sobě má typ `e -> Either e x`, což nám umožní zvolit si libovolné `x`, v našem případě `x = b`.
+Problém je ten, že `e@(Left _)` na levé straně rovnítka má typ `Either e a` zatímco na pravé straně potřebujeme `Either e b`. Pokud si dáme tu práci a na pravé straně přepíšeme znovu konstruktor `Left`, tak je vše v pořádku. Proč? `Left` sám o sobě má typ `e -> Either e x`, což nám umožní zvolit si libovolné `x`, v našem případě `x = b`.
 
 VI. Závěrem
 -----------

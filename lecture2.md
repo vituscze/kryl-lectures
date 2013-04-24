@@ -22,7 +22,7 @@ Opět se na přednášce vyskytl problém s kontexty, které nepatří před typ
     Ord(a) => qs :: [a] -> [a]
 
     -- správně je
-    qs :: ord a => [a] -> [a]
+    qs :: Ord a => [a] -> [a]
 
 Viz korekce první přednášky.
 

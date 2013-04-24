@@ -47,7 +47,7 @@ Drobná poznámka k sekcím operátorů (operator section):
     (1-) :: Int -> Int
     (-1) :: Int
 
-`(-1)` není sekce operátoru, ale konstanta. Narozdíl od jazyka `ML` nás Haskell nenutí používat `~1` pro záporná čísla. Na druhou stranu si ale programátor musí dávat pozor na podobné výrazy:
+`(-1)` není sekce operátoru, ale konstanta. Narozdíl od jazyka ML nás Haskell nenutí používat `~1` pro záporná čísla. Na druhou stranu si ale programátor musí dávat pozor na podobné výrazy:
 
     succ -1
     -- parsuje se jako (succ) - (1)

@@ -60,36 +60,6 @@ A samozřejmě problém se sekcí operátoru `(-)`. Pro "sekci" typu `(-n)` nab�
     subtract n
     -- subtract n m = m - n
 
-Nicméně, v některých případech nelze as-pattern použít, ačkoliv za normálních okolností by to problém nebyl:
-
-    :i Either
-    data Either a b = Left a | Right b      -- Defined in `Data.Either'
-
-    mapEither :: (a -> b) -> Either e a -> Either e b
-    mapEither f (Left e)  = Left e
-    mapEither f (Right a) = Right (f a)
-
-První řádek definice `mapEither` vypadá jako vhodný kandidát na as-pattern:
-
-    mapEither f e@(Left _) = e
-
-    <interactive>:5:81:
-    Couldn't match type `a' with `b'
-      `a' is a rigid type variable bound by
-          the type signature for
-            mapEither :: (a -> b) -> Either e a -> Either e b
-          at <interactive>:5:56
-      `b' is a rigid type variable bound by
-          the type signature for
-            mapEither :: (a -> b) -> Either e a -> Either e b
-          at <interactive>:5:56
-    Expected type: Either e b
-      Actual type: Either e a
-    In the expression: e
-    In an equation for `mapEither': mapEither f e@(Left _) = e
-
-Problém je ten, že `Left e` na levé straně rovnítka má typ `Either e a` zatímco na pravé straně potřebujeme `Either e b`. Pokud si dáme tu práci a na pravé straně přepíšeme znovu konstruktor `Left`, tak je vše v pořádku. Proč? `Left` sám o sobě má typ `e -> Either e x`, což nám umožní zvolit si libovolné `x`, v našem případě `x = b`.
-
 IV. Bottom
 ----------
 
@@ -137,6 +107,36 @@ Opět, as pattern je sémanticky ekvivalentní lokální definici:
 
     let as = expr
     in case expr of pat -> -- ...
+
+Nicméně, v některých případech nelze as-pattern použít, ačkoliv za normálních okolností by to problém nebyl:
+
+    :i Either
+    data Either a b = Left a | Right b      -- Defined in `Data.Either'
+
+    mapEither :: (a -> b) -> Either e a -> Either e b
+    mapEither f (Left e)  = Left e
+    mapEither f (Right a) = Right (f a)
+
+První řádek definice `mapEither` vypadá jako vhodný kandidát na as-pattern:
+
+    mapEither f e@(Left _) = e
+
+    <interactive>:5:81:
+    Couldn't match type `a' with `b'
+      `a' is a rigid type variable bound by
+          the type signature for
+            mapEither :: (a -> b) -> Either e a -> Either e b
+          at <interactive>:5:56
+      `b' is a rigid type variable bound by
+          the type signature for
+            mapEither :: (a -> b) -> Either e a -> Either e b
+          at <interactive>:5:56
+    Expected type: Either e b
+      Actual type: Either e a
+    In the expression: e
+    In an equation for `mapEither': mapEither f e@(Left _) = e
+
+Problém je ten, že `Left e` na levé straně rovnítka má typ `Either e a` zatímco na pravé straně potřebujeme `Either e b`. Pokud si dáme tu práci a na pravé straně přepíšeme znovu konstruktor `Left`, tak je vše v pořádku. Proč? `Left` sám o sobě má typ `e -> Either e x`, což nám umožní zvolit si libovolné `x`, v našem případě `x = b`.
 
 VI. Závěrem
 -----------

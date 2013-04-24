@@ -69,7 +69,7 @@ Nicméně, v některých případech nelze as-pattern použít, ačkoliv za norm
     mapEither f (Left e)  = Left e
     mapEither f (Right a) = Right (f a)
 
-První řádek vypadá jako vhodný kandidát na as-pattern:
+První řádek definice `mapEither` vypadá jako vhodný kandidát na as-pattern:
 
     mapEither f e@(Left _) = e
 

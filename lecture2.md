@@ -26,17 +26,7 @@ Opět se na přednášce vyskytl problém s kontexty, které nepatří před typ
 
 Viz korekce první přednášky.
 
-II. Quicksort
--------------
-
-Další populární chybou je označovat definici:
-
-    sort []     = []
-    sort (x:xs) = [y | y <- xs, y <= x] ++ [x] ++ [y | y <- xs, y > x]
-
-za quicksort. Jistě, jednou ze základních idejí quicksortu je metoda rozděl a panuj, nicméně druhou důležitou ideou je in-place přerozdělení pole. Tato definice bývá označována jako varianta tree sortu, která nepoužívá pomocný strom (deforested tree sort). Viz [Stack Overflow](http://stackoverflow.com/questions/7717691).
-
-III. Operátory
+II. Operátory
 --------------
 
 Drobná poznámka k sekcím operátorů (operator section):
@@ -60,7 +50,7 @@ A samozřejmě problém se sekcí operátoru `(-)`. Pro "sekci" typu `(-n)` nab�
     subtract n
     -- subtract n m = m - n
 
-IV. Bottom
+III. Bottom
 ----------
 
 Haskell pro bottom nepoužívá hodnotu `bot`, ale `undefined`, případně ještě `error`.
@@ -76,7 +66,7 @@ Což je také odpověď na otázku z přednášky: `undefined` má univerzálně
     x :: [Int]
     x = undefined
 
-V. Patterny
+IV. Patterny
 -----------
 
 Lazy patterny jsou sémanticky ekvivalentí lokální definici:
@@ -138,7 +128,7 @@ První řádek definice `mapEither` vypadá jako vhodný kandidát na as-pattern
 
 Problém je ten, že `e@(Left _)` na levé straně rovnítka má typ `Either e a` zatímco na pravé straně potřebujeme `Either e b`. Pokud si dáme tu práci a na pravé straně přepíšeme znovu konstruktor `Left`, tak je vše v pořádku. Proč? `Left` sám o sobě má typ `e -> Either e x`, což nám umožní zvolit si libovolné `x`, v našem případě `x = b`.
 
-VI. Závěrem
+V. Závěrem
 -----------
 
 Všiml jsem si, že spousta příkladů z přednášky je převzata z [language reportu](http://www.haskell.org/onlinereport/haskell2010/).

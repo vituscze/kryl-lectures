@@ -18,7 +18,9 @@ I. Pattern matching
       | integer-gmp:GHC.Integer.Type.J# GHC.Prim.Int# GHC.Prim.ByteArray#
             -- Defined in `integer-gmp:GHC.Integer.Type'
 
-Ačkoliv je předchozí definice poněkud nepřehledná, je zde vidět, že `Integer` obsahuje konstruktory `S#` (pro čísla, která se vejdou do `Int`u) a `J#` (pro čísla větší). To je také důvod, proč v novějších verzích GHC vyžaduje pattern matching na číslech instanci třídy `Eq`.
+Ačkoliv je předchozí definice poněkud nepřehledná, je zde vidět, že `Integer` obsahuje konstruktory `S#` (pro čísla, která se vejdou do `Int`u) a `J#` (pro čísla větší).
+
+Pattern matching na číslech se tedy musí převádět na volání operátoru `(==)`. To je také důvod, proč v novějších verzích GHC vyžaduje pattern matching na číslech instanci třídy `Eq`.
 
     ghci> let f 0 = 1; f n = n * f (n - 1)
     ghci> :t f

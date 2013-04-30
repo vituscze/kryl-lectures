@@ -20,7 +20,7 @@ I. Pattern matching
 
 Ačkoliv je předchozí definice poněkud nepřehledná, je zde vidět, že `Integer` obsahuje konstruktory `S#` (pro čísla, která se vejdou do `Int`u) a `J#` (pro čísla větší).
 
-Pattern matching na číslech se tedy musí převádět na volání operátoru `(==)`. To je také důvod, proč v novějších verzích GHC vyžaduje pattern matching na číslech instanci třídy `Eq`.
+Pattern matching na číslech se tedy musí převádět na volání operátoru `(==)`. To je také důvod, proč v novějších verzích GHC vyžaduje takovýto pattern matching instanci třídy `Eq`.
 
     ghci> let f 0 = 1; f n = n * f (n - 1)
     ghci> :t f
@@ -134,10 +134,10 @@ V. Typové třídy
 Jak bylo uvedeno na přednášce, Haskell umožňuje v deklaraci typové třídy poskytnout defaultní implementace některých funkcí. `Eq` např. vypadá takto:
 
     class Eq a where
-    (==), (/=) :: a -> a -> Bool
+        (==), (/=) :: a -> a -> Bool
 
-    a == b = not (a /= b)
-    a /= b = not (a == b)
+        a == b = not (a /= b)
+        a /= b = not (a == b)
 
 Všimněte si, že `Prelude` poskytuje defaultní implementace pro obě funkce. To např. znamená, že následující kód je v pořádku:
 

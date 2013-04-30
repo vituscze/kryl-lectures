@@ -4,7 +4,7 @@ Korekce 3. přednášky
 I. Pattern matching
 -------------------
 
-Číslené konstanty nejsou kontruktory žádného datového typu. Numerické konstanty se převádějí na volání konverzních funkcí takto:
+Číslené konstanty nejsou konstruktory žádného datového typu. Numerické konstanty se převádějí na volání konverzních funkcí takto:
 
     1   ==> fromInteger  (1   :: Integer )
     1.0 ==> fromRational (1.0 :: Rational)
@@ -92,7 +92,7 @@ Pro zájemce, operátor se stejným účelem se nachází v rozšiřujících kn
 
     -- typ specializovaný pro funkce: (a -> b) -> (b -> c) -> (a -> c)
 
-Pro nalezení počtu prvků, které jsou stejné jako zadaný prvek existuje velice elegantní způsob:
+Pro nalezení počtu prvků, které jsou stejné jako zadaný prvek, existuje velice elegantní způsob:
 
     eql k = length . filter (== k)
     -- vyfiltrujeme prvky nerovné 'k' a vezmeme délku zbylého seznamu

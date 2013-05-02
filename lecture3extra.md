@@ -122,4 +122,4 @@ Ačkoliv má operátor `(.)` velmi vysokou prioritu, aplikace funkcí má priori
 III. Závěrem
 ------------
 
-Opět jsem k nalezení na adrese vituscze@gmail.com. Tento text obsahuje skrytou referenci na Red Dwarf, tři bludišťáky pro toho, kdo ji odhalí.
+Opět jsem k nalezení na adrese vituscze@gmail.com . Tento text obsahuje skrytou referenci na Red Dwarf, tři bludišťáky pro toho, kdo ji odhalí.

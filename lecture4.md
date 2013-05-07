@@ -275,7 +275,7 @@ Stejně jako u `(>>=)` je výsledkem celé `IO` akce výsledek posledního výra
 
     ask :: IO String
     ask = do
-        putStrLn "What is your favourite color?"
+        putStrLn "What is your favourite colour?"
         answer <- getLine
         return answer
 
@@ -284,3 +284,98 @@ Ale jednodušší a přehlednější je psát:
     ask = do
         putStrLn "What is your favourite color?"
         getLine
+
+* * *
+
+Pokud I/O operace neuspěje, tak se ve většině případů vyhodí výjimka. Tuto výjimku je možno chytnout pouze z jiného `IO` bloku. Pokud by vás toto zajímalo více (nebo byste to potřebovali pro zápočtový program) napište mi mail a pokusím se dát něco dohromady.
+
+* * *
+
+### III.III. Axiomy monád
+
+Abychom mohli prohlásit určitý typový konstruktor za monádu, musíme implementovat funkce `return` a `(>>=)`, které musejí splňovat určitou sadu axiomů.
+
+    -- (1)
+    return x >>= f == f x
+
+    -- (2)
+    f >>= return == f
+
+    -- (3)
+    (f >>= g) >>= h == f >>= \a -> g a >>= h
+
+Pokud hodně přivřete obě oči, tak `(1)` a `(2)` říkají, že `return` je levá a pravá identita, `(3)` pak říká, že `(>>=)` je asociativní. Tyto axiomy dávájí trochu víc smysl, pokud se na ně podíváme pomocí `do`:
+
+    -- (1)
+    do
+        x' <- return x
+        f x'
+
+    ==
+    do
+        f x
+
+    -- (2)
+    do
+        x <- f
+        return x
+    ==
+    do
+        f
+
+Axiom `(2)` nám říká, že vynechání `return` na konci je korektní a nic se tím nezmění; viz `ask` výše.
+
+`(1)` a `(2)` spolu dávají přirozený požadavek, že `return` vrací právě tu hodnotu, na kterou byl aplikován a také to, že `return` jinak skutečně nic jiného nedělá.
+
+    -- (3)
+    do
+        x <- do y <- a
+                b y
+        c x
+    ==
+    do
+        y <- a
+        x <- b y
+        c x
+
+Axiom `(3)` nám říká, že můžeme vzít kus `IO` bloku a separovat ho do vlastní akce tak, že význam programu zůstane stejný. Praktický příklad osvětlí, k čemu je tohle vlastně dobré:
+
+    do
+        putStrLn "What is your quest?"
+        answer <- getLine
+        when (answer == "To seek the Holy Grail.") $
+            putStrLn "What is your favourite colour?"
+        -- etc
+
+Díky třetímu axiomu můžeme vzít první dva řádky `IO` bloku a vytvořit z nich separátní akci:
+
+    askQuest = putStrLn "What is your quest?" >> getLine
+
+    do
+        answer <- askQuest
+        when (anser == -- etc
+
+Což se jistě bude hodit, pokud nějakou posloupnost `IO` akcí rádi používáte na více místech.
+
+* * *
+
+Pokud nejste spokojeni s vysvětlením, že tyto axiomy říkají cosi o tom, že `return` je identita a `(>>=)` je asociativní:
+
+Definujme kompozici funkcí typu `a -> m b` pro nějakou monádu `m`:
+
+    (<=<) :: Monad m => (b -> m c) -> (a -> m b) -> (a -> m c)
+    f <=< g = \x -> g x >>= f
+
+Tyto axiomy se pak dají zapsat ve velice sugestivní formě:
+
+    -- (1)
+    f <=< return == f
+
+    -- (2)
+    return <=< f == f
+
+    -- (3)
+    f <=< (g <=< h) == (f <=< g) <=< h
+
+* * *
+

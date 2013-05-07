@@ -8,7 +8,7 @@ Ačkoliv by se mohlo zdát, že ve výrazu `f . g` se nejprve provede funkce `g`
 
     -- ignoruje druhý argument
     const :: a -> b -> a
-    ignore x _ = x
+    const x _ = x
 
     -- pro jakýkoliv argument se zacyklí
     boom :: a -> b
@@ -214,9 +214,9 @@ Pořád je tu ale takový nepříjemný problém: celý tento zápis je poněkud
     -- se zapíše jako
     x <- getLine
 
-    getLine >> getLine >>= \x -> -- ...
+    putStrLn "Name:" >> getLine >>= \x -> -- ...
     -- se zapíše jako
-    getLine
+    putStrLn "Name:"
     x <- getLine
 
 Tedy například naše `IO` akce na načítání dvou řetězců by mohla vypadat takto:
@@ -238,7 +238,7 @@ Vypsání dvou řetězců:
         putStrLn line1
         putStrLn line2
 
-Je taky dobré si uvědomit, že `do` slouží ke slepování akcí, pokud není co slepovat, `do` nedělá nic:
+Je taky dobré si uvědomit, že `do` slouží ke slepování akcí; pokud není co slepovat, `do` nedělá nic:
 
     printRev str = do
         putStrLn (reverse str)
@@ -269,4 +269,18 @@ Vidíte, kde je problém? Pokud zapomeneme, že nějaké `do` bloky máme, tak j
         putStrLn prompt >>= \_ ->
         getLine >>= \s ->
 
-Poslední lambda výraz nemá tělo! Přesně proto musí být posledním výrazem v `do` bloku nějaká `IO` akce (jejíž výsledek se pak stane výsledkem celého `do` bloku), může to být `return` nebo třeba i `getLine`.
+Poslední lambda výraz nemá tělo! Přesně proto musí být posledním výrazem v `do` bloku nějaká `IO` akce.
+
+Stejně jako u `(>>=)` je výsledkem celé `IO` akce výsledek posledního výrazu, tak obdobně v `do` bloku je výsledkem celé akce výsledek poslední řádky. Je tedy možné napsat:
+
+    ask :: IO String
+    ask = do
+        putStrLn "What is your favourite color?"
+        answer <- getLine
+        return answer
+
+Ale jednodušší a přehlednější je psát:
+
+    ask = do
+        putStrLn "What is your favourite color?"
+        getLine

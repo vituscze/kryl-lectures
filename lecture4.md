@@ -511,3 +511,67 @@ Přepišme původní `doWork` za pomoci `Either`:
         n <- compute x
         when (n == 0) $ throw "n was zero!"
         convert n
+
+#### III.IV.IV `[]`
+
+Další velice zajímavou strukturou, která připouští monádu, jsou seznamy. Na nějaký seznam typu `[a]` se můžeme dívat jako na nedeterministickou hodnotu typu `a`. Pokud bychom například chtěli definovat hodnotu typu `Int`, která může (nedeterministicky) nabývat dvou hodnot:
+
+    x :: [Int]
+    x = [1, 2]
+
+Pak také můžeme mít funkce, které produkují nedeterministické hodnoty, například odmocnina komplexních čísel:
+
+    cSqrt :: Complex Double -> [Complex Double]
+    cSqrt c = -- ...
+
+    -- 1.0 :+ 0.0 == 1 + 0i
+    cSqrt (1.0 :+ 0.0) == [1.0 :+ 0.0, -1.0 :- 0.0]
+
+V tomto případě je `cSqrt` funkce, která (nedeterministicky) produkuje oba dva kořeny. Jak bychom pomocí `cSqrt` definovali 4. odmocninu?
+
+    cSqrt4 :: Complex Double -> [Complex Double]
+    cSqrt4 x = cSqrt x -- ??
+
+Potřebujeme vzít výsledek `cSqrt` a aplikovat `cSqrt` na každý prvek: tím dostaneme `[[Complex Double]]`, na který můžeme použít funkci `concat :: [[a]] -> [a]`.
+
+    cSqrt4 x = concat (map cSqrt (cSqrt x))
+
+Můžeme od tohoto abstrahovat? Asi už víte kam tím mířím:
+
+    instance Monad [] where
+        return x = [x]
+        m >>= f  = concat (map f m)
+
+`return` v tomto případě říká, že každá deterministická hodnota je triviálně nedeterministická (vybíráme pouze z jedné hodnoty).
+
+Jak bychom provedli například kartézský součin dvou seznamů?
+
+    cross xs ys = do
+        x <- xs
+        y <- ys
+        return (x, y)
+
+Co takhle `map`u pomocí `do` bloku?
+
+    map' f xs = do
+        x <- xs
+        return (f x)
+
+Všimněte si, že tohle pracuje na stejném principu jako:
+
+    map'' f xs = [f x | x <- xs]
+
+A skutečně! `(>>=)` nám dává generátory a `return` nám dává výraz před svislítkem, potřebujeme ještě možnost ověřovat podmínky. Pokud se v nějakém kroku objeví prázdný seznam, tak pro tuto větev výpočtu není co počítat (takže se `[]` chová v jistém smyslu jako lokální `Nothing`), můžeme tedy selektivně ořezávat výpočty, které nevedou k cíli:
+
+    fail :: [a]
+    fail = []
+
+    pyth :: [(Int, Int, Int)]
+    pyth = do
+        c <- [1..100]
+        b <- [1..c]
+        a <- [1..b]
+        when (c^2 /= a^2 + b^2) fail
+        return (a, b, c)
+
+Toto funguje díky tomu, že `map f [] == []` pro libovolnou funkci `f`.

@@ -439,7 +439,7 @@ Stejně tak můžeme napsat `catch`:
 
     -- první argument reprezetuje výpočet, který může vyhodit "výjimku"
     -- druhý argument pak co dělat v případě, že výjimka nastala
-    catch :: Maybe a -> Maybe a -> Maybe
+    catch :: Maybe a -> Maybe a -> Maybe a
     catch Nothing e = e  -- výpočet skončil výjimkou
     catch x       _ = x  -- výpočet skončil v pořádku
 
@@ -472,7 +472,7 @@ Tj. `when cond action` provede akci `action` pouze pokud je podmínka `cond` spl
 
 #### III.IV.III `Either`
 
-`Maybe` nám umožňuje ohlašovat neúspěšné výjimky, ale typu chyby, která při výpočtu nastala nemáme ani zdání. Přidejme tedy k datovému konstruktoru `Nothing` informaci o typu chyby:
+`Maybe` nám umožňuje ohlašovat neúspěšné výjimky, ale o typu chyby, která při výpočtu nastala, nemáme ani zdání. Přidejme tedy k datovému konstruktoru `Nothing` informaci o typu chyby:
 
     data Either e a = Left e | Right a
     -- Left e znamená neúspěch se zprávou typu e

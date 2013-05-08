@@ -379,3 +379,135 @@ Tyto axiomy se pak dají zapsat ve velice sugestivní formě:
 
 * * *
 
+### III.IV. Konkrétní monády
+
+Jedním příkladem monády je tedy typový konstruktor `IO`, ten jsme však již podrobně rozebrali v předchozích částech, takže se o `IO` v této části nebudu zmiňovat.
+
+#### III.IV.I `Identity`
+
+Nejjednodušší monádou je typový konstruktor `Identity` definovaný takto:
+
+    newtype Identity a = Identity { runIdentity :: a }
+
+`Identity a` neobsahuje kromě hodnoty typu `a` nic jiného, takže je na první pohled patrné, že tato monáda nebude dělat nic zajímavého; uvádím ji zde pro úplnost.
+
+    instance Monad Identity where
+        return a = Identity a
+        Identity a >>= f = f a
+
+Můžete si ověřit, že tato monáda skutečně splňuje všechny axiomy.
+
+#### III.IV.II `Maybe`
+
+Pokud neuspěje pattern matching nebo se někde pokusíte vyhodnotit `undefined` či `error "..."` (a mnoho dalších případů), tak Haskell vyhodí výjimku. Z předchozích kapitol ale víme, že výjimky se dají chytat pouze v `IO` kódu. Nicméně v mnoha situacích by bylo užitečné zeptat se nějakého výrazu, jestli se výpočet podařil nebo ne. Přesně od toho je tu typ `Maybe` definovaný takto:
+
+    data Maybe a = Just a | Nothing
+
+Konstruktor `Just` reprezentuje úspěch s hodnotou typu `a` a `Nothing` pak reprezetuje neúspěch. Můžeme si tedy například napsat funkci `head`, která "nehavaruje" pro prázdné seznamy:
+
+    headSafe :: [a] -> Maybe a
+    headSafe []    = Nothing
+    headSafe (x:_) = Just x
+
+Po chvíli si však všimnete, že pracovat s podobnými funkcemi je mnohem nepohodlnější, protože vždy musíte explicitně kontrolovat, jestli se výsledek podařilo spočítat nebo ne.
+
+    compute :: Int -> Maybe Int
+    convert :: Int -> Maybe Char
+
+    doWork :: [Int] -> Maybe Char
+    doWork xs = case headSafe xs of
+        Nothing -> Nothing
+        Just x  -> case compute x of
+            Nothing -> Nothing
+            Just n  -> convert n
+
+Na pomoc přicházejí (nečekaně) monády. Když se podíváte na předchozí kód, snažíme se vlastně slepit několik výpočtů, které v každém kromu mohou selhat. Zkuste napsat `instance Monad Maybe where` a ověřte, že dané axiomy skutečně platí!
+
+Konkrétní instance je zde pro kontrolu uvedená:
+
+    instance Monad Maybe where
+        return = Just
+        Nothing >>= _ = Nothing
+        Just x  >>= f = f x
+
+Všimněte si, že `Nothing` slouží jako jakýsi exception:
+
+    throw :: Maybe a
+    throw = Nothing
+
+Stejně tak můžeme napsat `catch`:
+
+    -- první argument reprezetuje výpočet, který může vyhodit "výjimku"
+    -- druhý argument pak co dělat v případě, že výjimka nastala
+    catch :: Maybe a -> Maybe a -> Maybe
+    catch Nothing e = e  -- výpočet skončil výjimkou
+    catch x       _ = x  -- výpočet skončil v pořádku
+
+Stejně jako pro `IO` dostáváme zadarmo `do` bloky. Náš předchozí příklad `doWork` se dá zapsat velice stručně jako:
+
+    doWork xs = do
+        x <- headSafe xs
+        n <- compute x
+        convert n
+
+Pokud například zjistíme, že `convert` nechceme použít pokud `n == 0`, můžeme napsat jednoduše:
+
+    doWork xs = do
+        x <- headSafe xs
+        n <- compute x
+        when (n == 0) throw
+        convert n
+
+* * *
+
+Funkce `when` je definovaná v standardních knihovnách:
+
+    when :: Monad m => Bool -> m () -> m ()
+    when True  action = action
+    when False _      = return ()
+
+Tj. `when cond action` provede akci `action` pouze pokud je podmínka `cond` splněná.
+
+* * *
+
+#### III.IV.III `Either`
+
+`Maybe` nám umožňuje ohlašovat neúspěšné výjimky, ale typu chyby, která při výpočtu nastala nemáme ani zdání. Přidejme tedy k datovému konstruktoru `Nothing` informaci o typu chyby:
+
+    data Either e a = Left e | Right a
+    -- Left e znamená neúspěch se zprávou typu e
+    -- Right a znamená úspěch s výsledkem typu a
+
+Pokud chceme implemenovat instanci `Monad` pro `Either` narazíme na problém: `Either` je typový konstruktor, který očekává dva parametry - my však potřebujeme typový konstruktor s jedním parametrem. Řešení je jednoduché, `Either` aplikujeme na nějaký typ.
+
+Následující kód definuje instanci `Monad` pro typový konstruktor `Either e` a libovolné `e`:
+
+    instance Monad (Either e) where
+        return = Right
+        Left e  >>= _ = Left e
+        Right a >>= f = f a
+
+Funkcím `throw` a `catch` nyní můžeme dát poněkud lepší typy:
+
+    throw :: e -> Either e a
+    throw exc = Left exc
+
+    catch :: Either e a -> (e -> Either e a) -> Either e a
+    catch (Left ex) handle = handle ex
+    catch x         _      = x
+
+Přepišme původní `doWork` za pomoci `Either`:
+
+    compute :: Int -> Either String Int
+    convert :: Int -> Either String Char
+
+    headSafe :: [a] -> Either String a
+    headSafe []    = throw "List was empty!"
+    headSafe (x:_) = return x
+
+    doWork :: [Int] -> Either String Char
+    doWork xs = do
+        x <- headSafe xs
+        n <- compute x
+        when (n == 0) $ throw "n was zero!"
+        convert n

@@ -598,7 +598,7 @@ Pokud náš program používá nějaký konfigurační soubor, který si vždy p
 
 Je vidět, že když chceme použít nějakou funkci, jejíž chování je závislé na našem konfiguračním souboru, musíme `Config` neustále předávat dalším a dalším funkcím. Ve chvíli, kdy jedna hluboko zanořená funkce vyžaduje `Config`, všechny funkce, které ji volají musejí taky pracovat s `Config`em. Od tohoto však můžeme abstrahovat:
 
-    newtype Reader e a = Reader { runReader :: e -> a}
+    newtype Reader e a = Reader { runReader :: e -> a }
 
 `Reader e a` tedy reprezenuje nějaký výpočet, který produkuje nějakou hodnotu typu `a` za pomoci "globálního" stavu typu `e`. V našem případě bychom použili `Reader Config`.
 
@@ -632,7 +632,7 @@ Případně si ještě můžeme dovolit zlepšovák:
     -- asks = Reader
 
     strEq s1 s2 = do
-        c <- asks caseSensitive
+        cond <- asks caseSensitive
         -- ...
 
 Celý takovýto výpočet se pak "spustí" pomocí funkce (projekce) `runReader` definované spolu s typem `Reader`:

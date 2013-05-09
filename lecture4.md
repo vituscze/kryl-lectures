@@ -911,7 +911,7 @@ Ověříme, že všechny axiomy skutečně platí:
 
     -- a
     m >>= (\x -> f x >>= g)
-    -- je zjevně také Nothing, takže taky jsme v pořádku
+    -- je zjevně také Nothing, takže tady jsme v pořádku
 
     -- 2. m text1 je Just (x, t)
     \text1 -> case f x t of
@@ -1043,7 +1043,7 @@ Zkusme si to!
 
     ghci> runParser double "-1.-47e-1      "
     Just (-1.0,".-47e-1      ")
-    -- tady je vidět, že parser korektně naparsoval "-1." a zbytek řetězce
+    -- tady je vidět, že parser korektně naparsoval "-1" a zbytek řetězce
     -- nechal být
 
     ghci> runParser double "-a.47e-1      "

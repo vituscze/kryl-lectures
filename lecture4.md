@@ -806,6 +806,9 @@ Kromě toho ještě potřebujeme přístup k momentálnímu stavu a taky možnos
     put :: s -> State s ()
     put s = State $ \_ -> ((), s)
 
+    modify :: (s -> s) -> State s ()
+    modify f = State $ \s -> ((), f s)
+
 `get` prostě vezme momentální stav, předá ho dál a zároveň ho vrátí jako výsledek. `put s` pak stav ignoruje a nahradí jej novým stavem `s`. `label` můžeme napsat takto:
 
     label :: Tree a -> Tree Int

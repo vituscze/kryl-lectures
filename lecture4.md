@@ -563,15 +563,15 @@ Kde se v tomhle schovává nedeterminismus? Když napíšete `x <- xs`, tak se d
 
 A skutečně! `(>>=)` nám dává generátory a `return` nám dává výraz před svislítkem, potřebujeme ještě možnost ověřovat podmínky. Pokud se v nějakém kroku objeví prázdný seznam, tak pro tuto větev výpočtu není co počítat (takže se `[]` chová v jistém smyslu jako lokální `Nothing`), můžeme tedy selektivně ořezávat výpočty, které nevedou k cíli:
 
-    fail :: [a]
-    fail = []
+    fail' :: [a]
+    fail' = []
 
     pyth :: [(Int, Int, Int)]
     pyth = do
         c <- [1..100]
         b <- [1..c]
         a <- [1..b]
-        when (c^2 /= a^2 + b^2) fail
+        when (c^2 /= a^2 + b^2) fail'
         return (a, b, c)
 
 Toto funguje díky tomu, že `map f [] == []` pro libovolnou funkci `f`.
@@ -821,3 +821,230 @@ Kromě toho ještě potřebujeme přístup k momentálnímu stavu a taky možnos
             l' <- go l
             r' <- go r
             return (Node n l' r')
+
+### III.V. Parsování pomocí monád
+
+Jeden velice zajímavý příklad využití monád je parsování. Na tuto část se můžete dívat jako na řešený příklad stavby vlastní monády. Ve standardní knihovně se takováto monáda nenachází, ale součástí knihoven, které se distribuují v rámci Haskell Platform je knihovna parsec, která nabízí podobné rozhraní.
+
+Náš parser bude vlastně funkce, která bere text, pokusí se něco naparsovat a buď neuspěje nebo vrátí hodnotu a zbytek nenaparsovaného textu:
+
+    newtype Parser a = Parser { runParser :: String -> Maybe (a, String) }
+
+Sekvenční parsování za nás bude řešit `do` notace, napišme tedy instanci třídy `Monad`:
+
+    instance Monad Parser where
+
+Pro `return a` požadujeme, aby náš parser vždy uspěl s hodnotou `a` a nezkonzumoval žádný text:
+
+        return a = Parser $ \text -> Just (a, text)
+
+`(>>=)` bude sekvenčně spojovat dva parsery: pokud se první parser nepodaří, tak selže celý kombinovaný parser, pokud se první podaří, tak zkusíme provést druhý parser:
+
+        Parser m >>= f = Parser $ \text1 ->
+            case m text1 of
+                Nothing -> Nothing  -- první parser neuspěl
+                Just (a, text2) -> runParser (f a) text2
+
+Ověříme, že všechny axiomy skutečně platí:
+
+    -- (1)
+    f >>= return
+    ==
+    \text1 -> case f text1 of
+        Nothing -> Nothing
+        Just (a, text2) -> return a text2
+    ==
+    \text1 -> case f text1 of
+        Nothing -> Nothing
+        Just (a, text2) -> Just (a, text2)
+    ==
+    \text1 -> f text1
+    == -- eta redukce
+    f
+
+    -- (2)
+    return x >>= f
+    ==
+    (\t -> (x, t)) >>= f
+    ==
+    \text1 -> case (\t -> Just (x, t)) text1 of
+        Nothing -> Nothing
+        Just (a, text2) -> f a text2
+    ==
+    \text1 -> case Just (x, text1) of
+        Nothing -> Nothing
+        Just (a, text2) -> f a text2
+    ==
+    \text1 -> f x text1
+    ==
+    f x
+
+    -- (3)
+    (m >>= f) >>= g
+    ==
+    \text1 -> case (m >>= f) text1 of
+        Nothing -> Nothing
+        Just (b, text2) -> g b text2
+    ==
+    \text1 -> case (
+            \text3 -> case m text3 of
+                Nothing -> Nothing
+                Just (a, text4) -> f a text4
+          ) text1 of
+        Nothing -> Nothing
+        Just (b, text2) -> g b text2
+    ==
+    \text1 -> case (
+            case m text1 of
+                Nothing -> Nothing
+                Just (a, text4) -> f a text4
+          ) of
+        Nothing -> Nothing
+        Just (b, text2) -> g b text2
+
+    -- výraz to každopádně není pěkný
+    -- uvažme dvě alternativy, které mohou nastat
+
+    -- 1. m text1 je Nothing
+    -- potom se celý výraz redukuje na
+    \text1 -> Nothing
+
+    -- a
+    m >>= (\x -> f x >>= g)
+    -- je zjevně také Nothing, takže taky jsme v pořádku
+
+    -- 2. m text1 je Just (x, t)
+    \text1 -> case f x t of
+        Nothing -> Nothing
+        Just (b, text2) -> g b text2
+
+    -- a co na druhé straně?
+    -- po troše rozbalování definic dostaneme
+    \text1 -> case m text1 of
+        Nothing -> Nothing
+        Just (a, text2) -> case f a text2 of
+            Nothing -> Nothing
+            Just (b, text3) -> g b text3
+
+    -- nyní použijeme náš předpoklad, že m text1 == Just (x, t)
+    \text1 -> case f x t of
+        Nothing -> Nothing
+        Just (b, text3) -> g b text3
+
+    -- až na jména proměnných dostáváme stejný výraz, QED
+
+Kromě sekvenční kompozice parserů potřebujeme výběr mezi několika parsery: jestli se první nepodaří, zkus druhý. A aby se nám s tím lépe pracovalo, přidáme také parser, který nikdy neuspěje.
+
+    infixr 1 <|>
+
+    (<|>) :: Parser a -> Parser a -> Parser a
+    Parser p1 <|> Parser p2 = Parser $ \t ->
+        case p1 t of
+            Just x -> Just x  -- první parser uspěl, nemusíme zkoušet druhý
+            Nothing -> p2 t   -- první neuspěl, zkusme druhý
+
+    fail' :: Parser a
+    fail' = Parser $ \_ -> Nothing
+
+Teď můžeme pomocí těchto funkcí napsat pár kombinátorů:
+
+    -- výběr z několika parserů; použije první, který uspěje
+    choice :: [Parser a] -> Parser a
+    choice = foldr (<|>) fail'
+
+    -- naparsuje nula a více `a`-ček
+    many :: Parser a -> Parser [a]
+    many p = some p <|> return []
+
+    -- jeden a více
+    some :: Parser a -> Parser [a]
+    some p = do
+        a  <- p
+        as <- many p
+        return (a:as)
+
+    -- zkusí použí parser p; pokud ten selže, vrátí hodnotu a
+    option :: a -> Parser a -> Parser a
+    option a p = p <|> return a
+
+A několik základních parserů:
+
+    cond :: (Char -> Bool) -> Parser Char
+    cond p = Parser $ \t -> case t of
+        (x:xs) | p x -> Just (x, xs)
+        _            -> Nothing
+
+    char :: Char -> Parser Char
+    char c = cond (== c)
+
+    oneOf :: [Char] -> Parser Char
+    oneOf l = cond (`elem` l)
+
+    digit :: Parser Char
+    digit = cond isDigit
+
+    spaces :: Parser ()
+    spaces = many (cond isSpace) >> return ()
+
+Jako příklad si ukážeme parsování desetinných čísel. Pro jednoduchost používám na samotnou konverzi z řetězce na `Double` funkci `read`.
+
+    number = some digit
+
+    plus = do
+        char '+'
+        number
+
+    minus = do
+        char '-'
+        n <- number
+        return ('-':n)
+
+    integer = plus <|> minus <|> number
+
+    double = do
+        str <- helper
+        return (read str :: Double)
+      where
+        helper = do
+            i <- integer
+            d <- decimal
+            e <- exponent
+            return (i ++ d ++ e)
+
+        decimal = option "" $ do
+            char '.'
+            n <- number
+            return ('.':n)
+
+        exponent = option "" $ do
+            e <- oneOf "eE"
+            n <- integer
+            return (e:n)
+
+Zkusme si to!
+
+    ghci> runParser double "1"
+    Just (1.0,"")
+
+    ghci> runParser double "1      "
+    Just (1.0,"      ")
+
+    ghci> runParser double "1e5      "
+    Just (100000.0,"      ")
+
+    ghci> runParser double "-1e15      "
+    Just (-1.0e15,"      ")
+
+    ghci> runParser double "-1.47e15      "
+    Just (-1.47e15,"      ")
+
+    ghci> runParser double "-1.47e-1      "
+    Just (-0.147,"      ")
+
+    ghci> runParser double "-1.-47e-1      "
+    Just (-1.0,".-47e-1      ")
+    -- tady je vidět, že parser korektně naparsoval "-1." a zbytek řetězce
+    -- nechal být
+
+    ghci> runParser double "-a.47e-1      "
+    Nothing

@@ -717,7 +717,7 @@ To nám napovídá, že `StringWriter` by mohl fungovat pro více než jen `Stri
         mempty  :: m
         mappend :: m -> m -> m
 
-`mempty` je neutrální prvek (`[]` v případě seznamů) a `mappend` je binární operace (`(++)` v případě seznamů). Typová třída `Monoid` nikde nevynucuje, aby dané axiomy platili, ale každá implementace by se jimi měla řídit.
+`mempty` je neutrální prvek (`[]` v případě seznamů) a `mappend` je binární operace (`(++)` v případě seznamů). Typová třída `Monoid` nikde nevynucuje, aby dané axiomy platily, ale každá implementace by se jimi měla řídit.
 
 Nyní můžeme definovat obecnější `StringWriter`:
 

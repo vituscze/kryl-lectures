@@ -750,3 +750,71 @@ K čemu je tady `Sum`? Celá čísla připouští (alespoň) dva monoidy, jeden 
     newtype Product a = Product { getProduct :: a }
 
 * * *
+
+#### III.IV.VII. `State`
+
+`Reader` nám umožňuje ze stavu číst, ale nikoliv do něj psát; na druhou stranu `Writer` umožňuje psát, ale ne číst. Co kdybychom tyto dva přístupy zkombinovali a v každém kroku bychom mohli jak číst tak psát? Dostali bychom výpočet, který si vedle udržuje nějaký lokální stav.
+
+Ideálním příkladem je prohledávání stavového prostoru. Naším lokálním stavem pak bude seznam již navštívených stavů; obdobně se také můžeme implementovat BFS - lokálním stavem pak bude fronta.
+
+    bfs :: (s -> [s]) -> (s -> Bool) -> Maybe s
+    bfs trans end []     = Nothing
+    bfs trans end (x:xs) =
+      | end x     = Just x
+      | otherwise = bfs trans end (xs ++ trans x)
+
+`trans` je v našem případě přechodová funkce, `end` je koncová podmínka a v třetím argumentu si předáváme frontu. Všimněte si, že v každém kroku čteme stav (frontu) a také stav měníme (zavoláme `bfs` na `xs ++ trans x`).
+
+Takto bychom například očíslovali všechny uzly stromu jejich pořadím v DFS:
+
+    data Tree a = Nil | Node a (Tree a) (Tree a)
+        deriving (Show)
+
+    label :: Tree a -> Tree Int
+    label = fst . go 0
+      where
+        go n Nil = (Nil, n)
+        go n (Node x l r) =
+            let (l', nl) = go (n + 1) l
+                (r', nr) = go nl r
+            in  (Node n l' r', nr)
+
+Pomocná funkce `go` dostává ve svém prvním argumentu momentální pozici v prohledávání a vyprodukuje nový strom a novou pozici. Pokud je strom prázdný, není co označovat, vrátíme ten prázdný strom a pozici nezměníme. Pokud je strom neprázdný, tak zavoláme `go` na levý podstrom (s pozicí o jedna větší - momentální pozice přijde do právě zpracovávaného vrcholu), ta nám vrátí označený levý podstrom a novou pozici, atp.
+
+Sloučením `Writer`u a `Reader`u se nabízí abstrakce, která by byla tento problém elegantně řešit:
+
+    newtype State s a = State { runState :: s -> (a, s) }
+
+    instance Monad (State s) where
+        return a = State $ \s -> (a, s)
+        State m >>= f = State $ \s1 ->
+            let (a, s2) = m s1
+                (b, s3) = runState (f a) s2
+            in  (b, s3)
+    -- nebo jednodušeji:
+    --  State m >>= f = State $ \s1 ->
+    --      let (a, s2) = m s1
+    --      in  runState (f a) s2
+
+`return` prostě stav `s` předá dál aniž by něco měnil. `(>>=)` slepí dva stavové výpočty takto: vytvoří nový stavový výpočet, který bere nějaký stav `s1`. Pomocí stavu `s1` pustíme první akci `m` - ta nám vrátí hodnotu `a` a nový stav `s2`. Nyní můžeme aplikovat funkci `f` na `a` a tím dostaneme nový stavový výpočet, který pustíme se stavem `s2`.
+
+Kromě toho ještě potřebujeme přístup k momentálnímu stavu a taky možnost, jak stav změnit:
+
+    get :: State s s
+    get = State $ \s -> (s, s)
+
+    put :: s -> State s ()
+    put s = State $ \_ -> ((), s)
+
+`get` prostě vezme momentální stav, předá ho dál a zároveň ho vrátí jako výsledek. `put s` pak stav ignoruje a nahradí jej novým stavem `s`. `label` můžeme napsat takto:
+
+    label :: Tree a -> Tree Int
+    label t = fst . runState (go t) 0
+      where
+        go Nil = return Nil
+        go (Node x l r) = do
+            n <- get
+            put (n + 1)
+            l' <- go l
+            r' <- go r
+            return (Node n l' r')

@@ -645,3 +645,108 @@ Celý takovýto výpočet se pak "spustí" pomocí funkce (projekce) `runReader`
         let config = read configString
             result = runReader compute config
         putStrLn result
+
+#### III.IV.VI. `Writer`
+
+Už umí reprezentovat výpočty, které mohou selhat, nedeterminismus a výpočty, které čtou z "globálního" neměnného stavu. Přidejme ještě výpočty, které mohou produkovat nějaký pomocný výstup.
+
+Velice jednoduché debugování můžeme napsat tak, že kromě své obvyklé hodnoty bude produkovat ještě nějaký `String`:
+
+    addOne :: Int -> (Int, String)
+    addOne n = (n + 1, "Added one!")
+
+    toChar :: Int -> (Char, String)
+    toChar n = (chr n, "Converted to Char!")
+
+Co kdybyhom chtěli přidat jedničku a výsledek konvertovat na znak? Kromě toho, že si předáme výsledky, musíme ještě nějak zkombinovat debug výstupy:
+
+    addOneAndConvert :: Int -> (Char, String)
+    addOneAndConvert n
+        let (m, debug1) = addOne n
+            (c, debug2) = toChar m
+        in  (c, debug1 ++ debug2)
+
+Opět je vidět určitý pattern, od kterého můžeme abstrahovat:
+
+    newtype StringWriter a = StringWriter { runStringWriter :: (a, String) }
+
+    instance Monad StringWriter where
+        return a = StringWriter (a, "")
+        StringWriter (a, debug1) >>= f =
+            let StringWriter (b, debug2) = f a
+            in  StringWriter (b, debug1 ++ debug2)
+
+`return a` vrací `a` a žádný debug výstup neprodukuje. Ještě by se nám hodila funkce, která umožňuje debug výstup jednoduše produkovat:
+
+    tell' :: String -> StringWriter ()
+    tell' s = StringWriter ((), s)
+
+A teď již můžeme přepsat předchozí příklad:
+
+    addOne :: Int -> StringWriter Int
+    addOne n = do
+        tell' "Added one!"
+        return (n + 1)
+
+    toChar :: Int -> StringWriter Char
+    toChar n = do
+        tell' "Converted to Char!"
+        return (chr n)
+
+    addOneAndConvert :: Int -> StringWriter Char
+    addOneAndConvert n = do
+        m <- addOne
+        toChar m
+
+Pokud se pokusíte dokázat, že pro tuto konkrétní monádu platí všechny axiomy, všimněte si, že potřebujete využít toho, že `[]` je neutrální prvek vůči `(++)`, tedy:
+
+    -- (1)
+    [] ++ x  == x
+
+    -- (2)
+    x  ++ [] == x
+
+A také, že `(++)` je asociativní:
+
+    -- (3)
+    x ++ (y ++ z) == (x ++ y) ++ z
+
+To nám napovídá, že `StringWriter` by mohl fungovat pro více než jen `String`. Struktura, která splňuje tyto tři axiomy se nazývá monoid. Je to taková redukovaná grupa, které chybí inverzní prvek. Haskell nabízí typovou třídu pro monoidy v modulu `Data.Monoid`:
+
+    class Monoid m where
+        mempty  :: m
+        mappend :: m -> m -> m
+
+`mempty` je neutrální prvek (`[]` v případě seznamů) a `mappend` je binární operace (`(++)` v případě seznamů). Typová třída `Monoid` nikde nevynucuje, aby dané axiomy platili, ale každá implementace by se jimi měla řídit.
+
+Nyní můžeme definovat obecnější `StringWriter`:
+
+    newtype Writer w a = Writer { runWriter :: (a, w) }
+
+    instance Monoid w => Monad (Writer w) where
+        return a = Writer (a, mempty)
+        Writer (a, w1) >>= f =
+            let Writer (b, w2) = f a
+            in  Writer (b, w1 `mappend` w2)
+
+    tell :: w -> Writer w ()
+    tell w = Writer ((), w)
+
+Kromě seznamů tvoří monoid například celá čísla (`Integer`) s nulou a sčítáním. Zde je například nepříliš šikovný způsob, jak určit počet výskytů daného prvku v seznamu:
+
+    count :: Eq a => a -> [a] -> Integer
+    count what = getSum . snd . runWriter . action
+      where
+        action [] = return ()
+        action (x:xs)
+          | x == what = tell (Sum 1) >> action xs
+          | otherwise =                 action xs
+
+* * *
+
+K čemu je tady `Sum`? Celá čísla připouští (alespoň) dva monoidy, jeden s nulou a sčítáním, druhý s jedničkou a násobením. Pro rozlišení, který z nich máme vlastně na mysli se používají datové typy:
+
+    newtype Sum a = Sum { getSum :: a }
+    newtype Product a = Product { getProduct :: a }
+
+* * *

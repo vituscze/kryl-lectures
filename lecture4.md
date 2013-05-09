@@ -781,7 +781,7 @@ Takto bychom například očíslovali všechny uzly stromu jejich pořadím v DF
 
 Pomocná funkce `go` dostává ve svém prvním argumentu momentální pozici v prohledávání a vyprodukuje nový strom a novou pozici. Pokud je strom prázdný, není co označovat, vrátíme ten prázdný strom a pozici nezměníme. Pokud je strom neprázdný, tak zavoláme `go` na levý podstrom (s pozicí o jedna větší - momentální pozice přijde do právě zpracovávaného vrcholu), ta nám vrátí označený levý podstrom a novou pozici, atp.
 
-Sloučením `Writer`u a `Reader`u se nabízí abstrakce, která by byla tento problém elegantně řešit:
+Sloučením `Writer`u a `Reader`u se nabízí abstrakce, která by tento problém elegantně řešila:
 
     newtype State s a = State { runState :: s -> (a, s) }
 

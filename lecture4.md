@@ -648,7 +648,7 @@ Celý takovýto výpočet se pak "spustí" pomocí funkce (projekce) `runReader`
 
 #### III.IV.VI. `Writer`
 
-Už umí reprezentovat výpočty, které mohou selhat, nedeterminismus a výpočty, které čtou z "globálního" neměnného stavu. Přidejme ještě výpočty, které mohou produkovat nějaký pomocný výstup.
+Už umíme reprezentovat výpočty, které mohou selhat, nedeterminismus a výpočty, které čtou z "globálního" neměnného stavu. Přidejme ještě výpočty, které mohou produkovat nějaký pomocný výstup.
 
 Velice jednoduché debugování můžeme napsat tak, že kromě své obvyklé hodnoty bude produkovat ještě nějaký `String`:
 

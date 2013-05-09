@@ -338,7 +338,7 @@ Axiom `(2)` nám říká, že vynechání `return` na konci je korektní a nic s
         x <- b y
         c x
 
-Axiom `(3)` nám říká, že můžeme vzít kus `IO` bloku a separovat ho do vlastní akce tak, že význam programu zůstane stejný. Praktický příklad osvětlí, k čemu je tohle vlastně dobré:
+Axiom `(3)` nám říká, že můžeme vzít kus `do` bloku a separovat ho do vlastní akce tak, že význam programu zůstane stejný. Praktický příklad osvětlí, k čemu je tohle vlastně dobré:
 
     do
         putStrLn "What is your quest?"

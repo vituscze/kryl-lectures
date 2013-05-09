@@ -812,7 +812,7 @@ Kromě toho ještě potřebujeme přístup k momentálnímu stavu a taky možnos
 `get` prostě vezme momentální stav, předá ho dál a zároveň ho vrátí jako výsledek. `put s` pak stav ignoruje a nahradí jej novým stavem `s`. `label` můžeme napsat takto:
 
     label :: Tree a -> Tree Int
-    label t = fst . runState (go t) 0
+    label t = fst $ runState (go t) 0
       where
         go Nil = return Nil
         go (Node x l r) = do

@@ -557,7 +557,7 @@ Co takhle `map`u pomocí `do` bloku?
         x <- xs
         return (f x)
 
-Všimněte si, že tohle pracuje na stejném principu jako:
+Kde se v tomhle schovává nedeterminismus? Když napíšete `x <- xs`, tak se do `x` postupně dosadí každá hodnota seznamu `xs`. Všimněte si, že tohle pracuje na stejném principu jako:
 
     map'' f xs = [f x | x <- xs]
 
@@ -575,3 +575,73 @@ A skutečně! `(>>=)` nám dává generátory a `return` nám dává výraz pře
         return (a, b, c)
 
 Toto funguje díky tomu, že `map f [] == []` pro libovolnou funkci `f`.
+
+#### III.IV.V. `Reader`
+
+Pokud náš program používá nějaký konfigurační soubor, který si vždy při spuštění načte a podle něj se odvíjí chování některých funkcí, například:
+
+    data Config = Config { caseSensitive :: Bool }
+        deriving (Show, Read)
+
+    main = do
+        configString <- readFile "config.ini"
+        let config = read configString
+        ...
+
+    strEq :: Config -> String -> String -> Bool
+    strEq c s1 s2
+        | caseSensitive c = -- case sensitive rovnost
+        | otherwise       = -- etc.
+
+    shouldExit :: Config -> String -> Bool
+    shouldExit c s = strEq c s "exit"
+
+Je vidět, že když chceme použít nějakou funkci, jejíž chování je závislé na našem konfiguračním souboru, musíme `Config` neustále předávat dalším a dalším funkcím. Ve chvíli, kdy jedna hluboko zanořená funkce vyžaduje `Config`, všechny funkce, které ji volají musejí taky pracovat s `Config`em. Od tohoto však můžeme abstrahovat:
+
+    newtype Reader e a = Reader { runReader :: e -> a}
+
+`Reader e a` tedy reprezenuje nějaký výpočet, který produkuje nějakou hodnotu typu `a` za pomoci "globálního" stavu typu `e`. V našem případě bychom použili `Reader Config`.
+
+    instance Monad (Reader e) where
+        return a = Reader $ \_ -> a
+        Reader m >>= f = Reader $ \e -> runReader (f (m e)) e
+
+`return` říká, že hodnotu, kterou jsme vytvořili bez pomoci globálního stavu, můžeme jednoduše vnořit do výpočtu s globálním stavem tak, že tento stav jednoduše ignorujeme.
+
+`(>>=)` pak jednoduše předává stav jak prvnímu, tak druhému výpočtu.
+
+Ještě by se nám hodila jedna funkce: vyřešili jsme distribuci stavu všem výpočtům, ale uvnitř výpočtu nemáme možnost zeptat se, jak stav vlastně vypadá:
+
+    ask :: Reader e e
+    ask = Reader $ \e -> e
+
+Nyní můžeme přepsat `strEq` z posledního příkladu:
+
+    strEq :: String -> String -> Reader Config Bool
+    strEq s1 s2 = do
+        c <- ask
+        if caseSensitive c
+            then return (s1 == s2)
+            else return (map toLower s1 == map toLower s2)
+
+Případně si ještě můžeme dovolit zlepšovák:
+
+    asks :: (e -> a) -> Reader e a
+    asks f = Reader $ \e -> f e
+    -- nebo také
+    -- asks = Reader
+
+    strEq s1 s2 = do
+        c <- asks caseSensitive
+        -- ...
+
+Celý takovýto výpočet se pak "spustí" pomocí funkce (projekce) `runReader` definované spolu s typem `Reader`:
+
+    -- runReader :: Reader e a -> e -> a
+    compute :: Reader Config String
+
+    main = do
+        configString <- readFile "config.ini"
+        let config = read configString
+            result = runReader compute config
+        putStrLn result

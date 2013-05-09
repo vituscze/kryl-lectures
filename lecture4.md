@@ -84,9 +84,9 @@ Pokud zavedeme kvantifikaci typových proměnných explicitně (např. pragma `E
 
 Klíčový poznatek je, že Haskell umožňuje deklarovat typové třídy nejen pro konkrétní typy, ale i pro typové konstruktory. Nic vám nebrání napsat:
 
-    class Category arr where
-        id  :: arr a a
-        (.) :: arr b c -> arr a b -> arr a c
+    class Category cat where
+        id  :: cat a a
+        (.) :: cat b c -> cat a b -> cat a c
 
     -- definováno v modulu Control.Category
 
@@ -952,7 +952,7 @@ Teď můžeme pomocí těchto funkcí napsat pár kombinátorů:
     choice :: [Parser a] -> Parser a
     choice = foldr (<|>) fail'
 
-    -- naparsuje nula a více `a`-ček
+    -- naparsuje nula a více a-ček
     many :: Parser a -> Parser [a]
     many p = some p <|> return []
 
@@ -963,7 +963,7 @@ Teď můžeme pomocí těchto funkcí napsat pár kombinátorů:
         as <- many p
         return (a:as)
 
-    -- zkusí použí parser p; pokud ten selže, vrátí hodnotu a
+    -- zkusí použít parser p; pokud ten selže, vrátí hodnotu a
     option :: a -> Parser a -> Parser a
     option a p = p <|> return a
 

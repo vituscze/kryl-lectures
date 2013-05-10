@@ -525,7 +525,7 @@ Pak také můžeme mít funkce, které produkují nedeterministické hodnoty, na
     cSqrt c = -- ...
 
     -- 1.0 :+ 0.0 == 1 + 0i
-    cSqrt (1.0 :+ 0.0) == [1.0 :+ 0.0, -1.0 :- 0.0]
+    cSqrt (1.0 :+ 0.0) == [1.0 :+ 0.0, -1.0 :+ 0.0]
 
 V tomto případě je `cSqrt` funkce, která (nedeterministicky) produkuje oba dva kořeny. Jak bychom pomocí `cSqrt` definovali 4. odmocninu?
 
@@ -650,7 +650,7 @@ Celý takovýto výpočet se pak "spustí" pomocí funkce (projekce) `runReader`
 
 Už umíme reprezentovat výpočty, které mohou selhat, nedeterminismus a výpočty, které čtou z "globálního" neměnného stavu. Přidejme ještě výpočty, které mohou produkovat nějaký pomocný výstup.
 
-Velice jednoduché debugování můžeme napsat tak, že kromě své obvyklé hodnoty bude produkovat ještě nějaký `String`:
+Velice jednoduché debugování můžeme napsat tak, že funkce budou kromě své obvyklé hodnoty produkovat ještě nějaký `String`:
 
     addOne :: Int -> (Int, String)
     addOne n = (n + 1, "Added one!")
@@ -779,7 +779,7 @@ Takto bychom například očíslovali všechny uzly stromu jejich pořadím v DF
                 (r', nr) = go nl r
             in  (Node n l' r', nr)
 
-Pomocná funkce `go` dostává ve svém prvním argumentu momentální pozici v prohledávání a vyprodukuje nový strom a novou pozici. Pokud je strom prázdný, není co označovat, vrátíme ten prázdný strom a pozici nezměníme. Pokud je strom neprázdný, tak zavoláme `go` na levý podstrom (s pozicí o jedna větší - momentální pozice přijde do právě zpracovávaného vrcholu), ta nám vrátí označený levý podstrom a novou pozici, atp.
+Pomocná funkce `go` dostává ve svém prvním argumentu momentální pozici v prohledávání a vyprodukuje nový strom a novou pozici. Pokud je strom prázdný, není co označovat, vrátíme prázdný strom a pozici nezměníme. Pokud je strom neprázdný, tak zavoláme `go` na levý podstrom (s pozicí o jedna větší - momentální pozice přijde do právě zpracovávaného vrcholu), ta nám vrátí označený levý podstrom a novou pozici, atp.
 
 Sloučením `Writer`u a `Reader`u se nabízí abstrakce, která by tento problém elegantně řešila:
 
@@ -822,9 +822,95 @@ Kromě toho ještě potřebujeme přístup k momentálnímu stavu a taky možnos
             r' <- go r
             return (Node n l' r')
 
+#### III.IV.VIII. Další monády
+
+Pro zajímavost uvadím další hrstku monád, tentokrát již bez detailní motivace a použití.
+
+##### III.IV.VIII.I. `Cont`
+
+`Cont` (continuation) monáda slouží pro popis výpočtů, které mohou být přerušeny a poté znovu spuštěny. Podobně jako `Either` se dá použít pro zpracovávání chyb.
+
+    newtype Cont r a = Cont { runCont :: (a -> r) -> r }
+
+    instance Monad (Cont r) where
+        return a = Cont $ \k -> k a
+        Cont m >>= f = Cont $ \k ->
+            m (\a -> runCont (f a) k)
+
+    callCC :: ((a -> Cont r b) -> Cont r a) -> Cont r a
+    callCC e = Cont $ \k -> runCont (e (\a -> Cont $ \_ -> k a)) k
+
+##### III.IV.VIII.II. `RWS`
+
+`RWS` je kombinace monád `Reader`, `Writer` a `State`:
+
+    newtype RWS r w s a = RWS { runRWS :: r -> s -> (a, s, w) }
+
+    instance Monoid w => Monad (RWS r w s) where
+        return a = RWS $ \_ s -> (a, s, mempty)
+        RWS m >>= f = RWS $ \r s1 ->
+            let (a, s2, w1) = m r s1
+                (b, s3, w2) = runRWS (f a) r s2
+            in  (b, s3, w1 `mappend` w2)
+
+    tell :: w -> RWS r w s ()
+    tell w = RWS $ \_ s -> ((), s, w)
+
+    ask :: Monoid w => RWS r w s r
+    ask = RWS $ \r s -> (r, s, mempty)
+
+    put :: Monoid w => s -> RWS r w s ()
+    put s = RWS $ \_ _ -> ((), s, mempty)
+
+    get :: Monoid w => RWS r w s s
+    get = RWS $ \_ s -> (s, s, mempty)
+
+##### III.IV.VIII.III. `Dist`
+
+`Dist` reprezentuje distribuci náhodné veličiny:
+
+    newtype Dist a = Dist { runDist :: [(a, Rational)] }
+
+    instance Monad Dist where
+        return a = Dist [(a, 1)]
+        Dist m >>= f = Dist $ concatMap
+            (\(a, r) -> map (\(b, r2) -> (b, r * r2)) (runDist (f a))) m
+
+##### III.IV.VIII.IV. `ST`
+
+`ST` monáda slouží k popisu imperativních výpočtů, které pracují s in-place mutací. Na úrovni typů je garantováno, že žádný vedlejší efekt neproklouzne ven z výpočtu.
+
+##### III.IV.VIII.V. `STM`
+
+`STM` neboli software transactional memory je alternativní přístup k synchronizaci vláken. Narozdíl od klasických "lock" přístupů `STM` naprosto vylučuje deadlock.
+
+##### III.IV.VIII.VI. `RState`
+
+`RState` je `State`, ve kterém se stav předává v obráceném pořadí:
+
+    newtype RState s a = RState { runRState :: s -> (a,s) }
+
+    instance Monad (RState s) where
+        return a = RState (\s -> (a,s))
+        RState m >>= f = RState $ \s1 ->
+            let (a, s3) = m s2
+                (b, s2) = runRState (f a) s1
+            in  (b, s3)
+
+##### III.IV.VIII.VII. "Free" monáda
+
+    data Free f a
+        = Pure a
+        | Roll (f (Free f a))
+
+    instance Functor f => Monad (Free f) where
+        return = Pure
+        Pure a >>= f = f a
+        Roll m >>= f = Roll $ fmap (>>= f) m
+
 ### III.V. Parsování pomocí monád
 
-Jeden velice zajímavý příklad využití monád je parsování. Na tuto část se můžete dívat jako na řešený příklad stavby vlastní monády. Ve standardní knihovně se takováto monáda nenachází, ale součástí knihoven, které se distribuují v rámci Haskell Platform je knihovna parsec, která nabízí podobné rozhraní.
+Jeden velice zajímavý příklad využití monád je parsování. Na tuto část se můžete dívat jako na řešený příklad stavby vlastní monády. Ve standardní knihovně se takováto monáda nenachází, ale součástí knihoven, které se distribuují v rámci Haskell Platform, je knihovna parsec, která nabízí podobné rozhraní.
 
 Náš parser bude vlastně funkce, která bere text, pokusí se něco naparsovat a buď neuspěje nebo vrátí hodnotu a zbytek nenaparsovaného textu:
 

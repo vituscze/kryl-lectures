@@ -1134,3 +1134,118 @@ Zkusme si to!
 
     ghci> runParser double "-a.47e-1      "
     Nothing
+
+### III.VI. Pomocné funkce
+
+Standardní knihovna definuje spoustu funkcí pro práci s monádami. Podívejme se na pár příkladů, které se dají celkem pěkně uplatnit:
+
+Pro práci se seznamy máme funkce:
+
+    sequence :: Monad m => [m a] -> m [a]
+    sequence = foldr step (return [])
+      where
+        step m r = do
+            a  <- m
+            as <- r
+            return (a:as)
+
+    sequence_ :: Monad m => [m a] -> m ()
+    sequence_ = foldr (>>) (return ())
+
+`sequence` a `sequence_` fungují tak, že vezmou seznam monadických akcí, provedou každou akci, `sequence` pak výsledky uloží do seznamu. Pokud nás výsledky nezajímají, `sequence_` je efektivnější verze, která tyto výsledky ignoruje.
+
+    -- definováno v std knihovně
+    print :: Show a => a -> IO ()
+    print = putStrLn . show
+
+    ghci> sequence_ [print i | i <- [1..10]]
+    1
+    2
+    3
+    4
+    5
+    6
+    7
+    8
+    9
+    10
+
+    ghci> sequence (replicate 5 getLine)
+    user input 1
+    user input 2
+    user input 3
+    user input 4
+    user input 5
+    ["user input 1","user input 2","user input 3","user input 4","user input 5"]
+
+Všimněte si, že `sequence` funguje pro libovolnou monádu:
+
+    ghci> sequence [[1,2], [4,5,6]]
+    [[1,4],[1,5],[1,6],[2,4],[2,5],[2,6]]
+
+Na `sequence` jsou založeny další funkce:
+
+    mapM :: Monad m => (a -> m b) -> [a] -> m [b]
+    mapM f = sequence . map f
+
+    mapM_ :: Monad m => (a -> m b) -> [a] -> m [b]
+    mapM_ f = sequence_ . map f
+
+    forM :: Monad m => [a] -> (a -> m b) -> m [b]
+    forM = flip mapM
+
+    -- analogicky pro forM_
+
+    action :: IO [String]
+    action = forM [1..5] $ \i -> do
+        putStrLn $ "Write number " ++ show i
+        getLine
+
+    ghci> action
+    Write number 1
+    14
+    Write number 2
+    2
+    Write number 3
+    7
+    Write number 4
+    42
+    Write number 5
+    3
+    ["14","2","7","42","3"]
+
+`forM` a `forM_` se nacházejí v modulu `Control.Monad`.
+
+Dále máme kompozici (zmíněnou již dříve):
+
+    (>=>) :: Monad m => (a -> m b) -> (b -> m c) -> a -> m c
+    f >=> g = \x -> f x >>= g
+
+    (<=<) :: Monad m => (b -> m c) -> (a -> m b) -> a -> m c
+    (<=<) = flip (>=>)
+
+Kromě `forM` cyklu máme i `while (true)`:
+
+    forever :: Monad m => m a -> m b
+    forever m = m >> forever m
+
+    ghci> forever (getLine >>= putStrLn)
+    Hello
+    Hello
+    x
+    x
+    -- ...
+
+Pro práci s podmínkami existují funkce:
+
+    when :: Monad m => Bool -> m () -> m ()
+    when True  m = m
+    when False _ = return ()
+
+    unless :: Monad m => Bool -> m () -> m ()
+    unless = when . not
+
+IV. Závěrem
+-----------
+
+Uh, snad je to všechno. Pokud máte nějaké dotazy (jakože dotazy pravděpodobně budou), jsem k sehnání na vituscze@gmail.com

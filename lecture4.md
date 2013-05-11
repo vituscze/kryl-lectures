@@ -299,10 +299,10 @@ Abychom mohli prohlásit určitý typový konstruktor za monádu, musíme implem
     return x >>= f == f x
 
     -- (2)
-    f >>= return == f
+    m >>= return == m
 
     -- (3)
-    (f >>= g) >>= h == f >>= \a -> g a >>= h
+    (m >>= f) >>= g == m >>= \x -> f x >>= g
 
 Pokud hodně přivřete obě oči, tak `(1)` a `(2)` říkají, že `return` je levá a pravá identita, `(3)` pak říká, že `(>>=)` je asociativní. Tyto axiomy dávájí trochu víc smysl, pokud se na ně podíváme pomocí `do`:
 
@@ -317,11 +317,11 @@ Pokud hodně přivřete obě oči, tak `(1)` a `(2)` říkají, že `return` je 
 
     -- (2)
     do
-        x <- f
+        x <- m
         return x
     ==
     do
-        f
+        m
 
 Axiom `(2)` nám říká, že vynechání `return` na konci je korektní a nic se tím nezmění; viz `ask` výše.
 
@@ -527,7 +527,7 @@ Pak také můžeme mít funkce, které produkují nedeterministické hodnoty, na
     -- 1.0 :+ 0.0 == 1 + 0i
     cSqrt (1.0 :+ 0.0) == [1.0 :+ 0.0, -1.0 :+ 0.0]
 
-V tomto případě je `cSqrt` funkce, která (nedeterministicky) produkuje oba dva kořeny. Jak bychom pomocí `cSqrt` definovali 4. odmocninu?
+V tomto případě je `cSqrt` funkce, která produkuje oba dva kořeny. Jak bychom pomocí `cSqrt` definovali 4. odmocninu?
 
     cSqrt4 :: Complex Double -> [Complex Double]
     cSqrt4 x = cSqrt x -- ??
@@ -590,8 +590,8 @@ Pokud náš program používá nějaký konfigurační soubor, který si vždy p
 
     strEq :: Config -> String -> String -> Bool
     strEq c s1 s2
-        | caseSensitive c = -- case sensitive rovnost
-        | otherwise       = -- etc.
+      | caseSensitive c = -- case sensitive rovnost
+      | otherwise       = -- etc.
 
     shouldExit :: Config -> String -> Bool
     shouldExit c s = strEq c s "exit"
@@ -934,19 +934,19 @@ Pro `return a` požadujeme, aby náš parser vždy uspěl s hodnotou `a` a nezko
 Ověříme, že všechny axiomy skutečně platí:
 
     -- (1)
-    f >>= return
+    m >>= return
     ==
-    \text1 -> case f text1 of
+    \text1 -> case m text1 of
         Nothing -> Nothing
         Just (a, text2) -> return a text2
     ==
-    \text1 -> case f text1 of
+    \text1 -> case m text1 of
         Nothing -> Nothing
         Just (a, text2) -> Just (a, text2)
     ==
-    \text1 -> f text1
+    \text1 -> m text1
     == -- eta redukce
-    f
+    m
 
     -- (2)
     return x >>= f

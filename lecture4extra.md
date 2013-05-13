@@ -138,7 +138,7 @@ Pokud si přidáme pár primitivních operací:
     put :: s -> StateT s m ()
     put s = StateT $ \_ -> return ((), s)
 
-Na první pohled je vidět, že pokud je náš typ transformeru např. `StateT s (ErrorT e m) a`, tak sice můžeme použít `get` a `put`, ale `throwError` má "špatný" typ. Původním účelem ale bylo právě kombinování efektů, v což nám tento problém zabraňuje.
+Na první pohled je vidět, že pokud je náš typ transformeru např. `StateT s (ErrorT e m) a`, tak sice můžeme použít `get` a `put`, ale `throwError` má "špatný" typ. Původním účelem ale bylo právě kombinování efektů, což nám tento problém znemožňuje.
 
 Definujeme tedy třídu, která nám umožní vzít výpočet ve spodní monádě a vyzvednout ho do celého transformeru:
 

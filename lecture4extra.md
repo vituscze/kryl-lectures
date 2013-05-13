@@ -79,3 +79,97 @@ Typová třída `ErrorMsg` označuje typy, které podporují generování defaul
         strMsg = id
 
 Nicméně, pro mnoho monád neexistuje rozumná implementace funkce `fail`.
+
+II. Monad transformers
+======================
+
+Monády nám umožňují popsat mnoho různých typů výpočtů, ale zatím neumíme kombinovat efekty různých výpočtů do jednoho. Co se tím myslí? Pokud bychom chtěli kombinovat lokální stav (`State s`) s možností chyby (`Either e`), tak si musíme napsat vlastní monádu.
+
+    newtype StateError s e a = StateError { runStateError :: s -> Either e (a, s) }
+
+Pokud se nalézáme v situaci, kdy často potřebujeme používat různé efekty různých monád a vytvářet si speciální datový typ pro každou takovou příležitost je značně nepohodlné, nepřehledné či časově náročné, můžeme použít takzvaný monad transformer.
+
+Monad transformery nám dávají jednoduchý nástroj jak kombinovat více monád dohromady. Místo obyčejného `State s` budeme mít `StateT s m`, kde `m` označuje další "vnitřní" monádu:
+
+    newtype StateT s m a = StateT { runStateT :: s -> m (a, s) }
+
+Místo `Either e` budeme mít `ErrorT e m`:
+
+    newtype ErrorT e m a = ErrorT { runErrorT :: m (Either e a) }
+
+Pokud chceme tento řetěz ukončit, dáme na dno monádu, která nic nedělá:
+
+    newtype Identity a = Identity { runIdentity :: a }
+
+Náš předchozí typ by tedy mohl vypadat:
+
+    type StateError s e a = StateT s (ErrorT e Identity) a
+
+Instance se definují obdobně:
+
+    instance Monad m => Monad (StateT s m) where
+        return a = StateT $ \s -> return (a, s)
+        StateT m >>= f = StateT $ \s1 -> do
+            (a, s2) <- m s1
+            runStateT (f a) s2
+
+        fail s = StateT $ \_ -> fail s
+
+    instance (ErrorMsg e, Monad m) => Monad (ErrorT e m) where
+        return = ErrorT . return . Right
+        ErrorT m >>= f = ErrorT $ do
+            ea <- m
+            case ea of
+                Left e  -> return (Left e)
+                Right a -> runErrorT (f a)
+
+        fail = ErrorT . return . Left . strMsg
+
+Všimněte se, že v definici `Monad (StateT s m)` používáme `fail` "spodní" monády, což nám umožňuje rozumně ukončit výpočet, pokud to spodní monáda podporuje.
+
+Pokud si přidáme pár primitivních operací:
+
+    throwError :: e -> EitherT e m a
+    throwError = EitherT . return . Left
+
+    get :: StateT s m s
+    get = StateT $ \s -> return (s, s)
+
+    put :: s -> StateT s m ()
+    put s = StateT $ \_ -> return ((), s)
+
+Na první pohled je vidět, že pokud je náš typ transformeru např. `StateT s (ErrorT e m) a`, tak sice můžeme použít `get` a `put`, ale `throwError` má "špatný" typ. Původním účelem ale bylo právě kombinování efektů, v což nám tento problém zabraňuje.
+
+Definujeme tedy třídu, která nám umožní vzít výpočet ve spodní monádě a vyzvednout ho do celého transformeru:
+
+    class MonadTrans t where
+        lift :: Monad m => m a -> t m a
+
+Nyní můžeme definovat instanci pro `StateT` a `ErrorT`:
+
+    instance MonadTrans (StateT s) where
+        lift m = StateT $ \s -> do
+            a <- m
+            return (a, s)
+
+    instance MonadTrans (ErrorT e) where
+        lift m = ErrorT $ do
+            a <- m
+            return (Right a)
+
+Díky `lift` tedy např. můžeme vzít `throwError` a vyzvednout ho do kontextu celého transformeru:
+
+    run :: StateT s (ErrorT e Identity) a -> s -> Either e (a, s)
+    run m = runIdentity . runErrorT . runStateT m
+
+    f :: Int -> StateT Int (ErrorT String Identity) ()
+    f x = do
+        s <- get
+        when (s == x) . lift . throwError $ "Some error"
+        put x
+
+    ghci> run (f 4) 4
+    Left "Some error"
+
+    ghci> run (f 4) 5
+    Right ((),4)

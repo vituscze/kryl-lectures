@@ -51,5 +51,5 @@ module Proof (s : Set) where
   assoc s′ m f g with m s′
   ... | nothing = refl
   ... | just (a , s″) with f a s″
-  ...    | just _  = refl
-  ...    | nothing = refl
+  ...   | just _  = refl
+  ...   | nothing = refl

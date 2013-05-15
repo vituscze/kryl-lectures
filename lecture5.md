@@ -87,7 +87,15 @@ Poslední poznámka se týká monády `State` z přednášky. Typ `Table` je (a�
 
     newtype State s a = State { runState :: s -> (a, s) }
 
-IV. Závěrem
+IV. Monády
+----------
+
+Pro doplnění znalostí o monádách doporučuji:
+
+* [You Could Have Invented Monads!](http://blog.sigfpe.com/2006/08/you-could-have-invented-monads-and.html)
+* Learn You a Haskell - kapitoly [11](http://learnyouahaskell.com/functors-applicative-functors-and-monoids) a [12](http://learnyouahaskell.com/a-fistful-of-monads)
+
+V. Závěrem
 -----------
 
 Hmm, proč ty závěry vlastně píšu? Jako vždy: vituscze@gmail.com

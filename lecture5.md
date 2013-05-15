@@ -93,7 +93,7 @@ IV. Monády
 Pro doplnění znalostí o monádách doporučuji:
 
 * [You Could Have Invented Monads!](http://blog.sigfpe.com/2006/08/you-could-have-invented-monads-and.html)
-* Learn You a Haskell - kapitoly [11](http://learnyouahaskell.com/functors-applicative-functors-and-monoids) a [12](http://learnyouahaskell.com/a-fistful-of-monads)
+* Learn You a Haskell - kapitoly [11](http://learnyouahaskell.com/functors-applicative-functors-and-monoids), [12](http://learnyouahaskell.com/a-fistful-of-monads) a [13](http://learnyouahaskell.com/for-a-few-monads-more)
 
 V. Závěrem
 -----------
